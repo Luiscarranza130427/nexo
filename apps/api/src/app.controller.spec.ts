@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
+import { PrismaService } from './database/prisma.service.js';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -8,7 +9,11 @@ describe('AppController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
+      providers: [
+        AppService,
+        // Stubbed so the unit tests never need a live database.
+        { provide: PrismaService, useValue: { isHealthy: () => Promise.resolve(true) } },
+      ],
     }).compile();
 
     appController = app.get<AppController>(AppController);
@@ -23,6 +28,15 @@ describe('AppController', () => {
   describe('health', () => {
     it('should report a healthy status', () => {
       expect(appController.getHealth()).toEqual({ status: 'ok' });
+    });
+  });
+
+  describe('health/db', () => {
+    it('should report the database as connected', async () => {
+      await expect(appController.getDatabaseHealth()).resolves.toEqual({
+        status: 'ok',
+        database: 'connected',
+      });
     });
   });
 });

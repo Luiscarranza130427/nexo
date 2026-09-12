@@ -6,7 +6,7 @@ Phases are built in order. Nothing from a later phase is implemented early.
 | ----- | -------------------------------- | -------------- |
 | 1     | Environment and Git              | ✅ Done        |
 | 2     | Monorepo and base applications   | ✅ Done        |
-| 3     | Database and Prisma              | ⬜ Not started |
+| 3     | Database and Prisma              | ✅ Done        |
 | 4     | Authentication and RBAC          | ⬜ Not started |
 | 5     | Design system and layout         | ⬜ Not started |
 | 6     | Clients                          | ⬜ Not started |

@@ -27,6 +27,13 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer()).get('/health').expect(200).expect({ status: 'ok' });
   });
 
+  it('/health/db (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/health/db')
+      .expect(200)
+      .expect({ status: 'ok', database: 'connected' });
+  });
+
   afterEach(async () => {
     await app.close();
   });

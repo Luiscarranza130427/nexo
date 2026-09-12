@@ -3,8 +3,12 @@ packages:
   - 'packages/*'
 
 # pnpm 10 blocks dependency build scripts unless they are approved here.
-# Both are required by Next.js: sharp for image optimization, unrs-resolver
-# for the ESLint import resolver used by eslint-config-next.
+# - sharp / unrs-resolver: required by Next.js (image optimization, ESLint import resolver).
+# - prisma / @prisma/engines: fetch the Prisma query and schema engines.
+# - esbuild: native binary used by tsx to run the TypeScript seed script.
 onlyBuiltDependencies:
   - sharp
   - unrs-resolver
+  - prisma
+  - '@prisma/engines'
+  - esbuild
