@@ -1,0 +1,28 @@
+{
+  "name": "nexo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Internal operations platform for modern teams. A NovaTec Product.",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=20.9.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @nexo/web --filter @nexo/api dev",
+    "dev:web": "pnpm --filter @nexo/web dev",
+    "dev:api": "pnpm --filter @nexo/api dev",
+    "build": "pnpm -r build",
+    "build:web": "pnpm --filter @nexo/web build",
+    "build:api": "pnpm --filter @nexo/api build",
+    "lint": "pnpm -r lint",
+    "lint:web": "pnpm --filter @nexo/web lint",
+    "lint:api": "pnpm --filter @nexo/api lint",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2"
+  }
+}

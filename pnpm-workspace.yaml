@@ -1,0 +1,10 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+# pnpm 10 blocks dependency build scripts unless they are approved here.
+# Both are required by Next.js: sharp for image optimization, unrs-resolver
+# for the ESLint import resolver used by eslint-config-next.
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver

@@ -1,0 +1,9 @@
+{
+  "name": "@nexo/config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared configuration for the Nexo monorepo.",
+  "files": [
+    "tsconfig.base.json"
+  ]
+}

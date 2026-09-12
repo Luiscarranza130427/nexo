@@ -1,0 +1,26 @@
+{
+  "name": "@nexo/types",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Types shared between the Nexo frontend and backend.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@nexo/config": "workspace:*",
+    "typescript": "^5"
+  }
+}
