@@ -45,14 +45,17 @@ filter without a join. The application is responsible for keeping a task's
 | `Project`       | Work delivered by the organization, optionally for a client.          |
 | `ProjectMember` | A user assigned to a project.                                         |
 | `Task`          | A unit of work inside a project.                                      |
+| `Session`       | A revocable refresh-token session. One row per active login.          |
 
 ### Entity notes
 
 - **Organization** — `slug` is globally unique and will become the tenant handle.
   `status` is `ACTIVE` / `INACTIVE`.
-- **User** — `email` is globally unique. Deliberately holds no `password`,
-  `passwordHash`, `refreshToken` or OAuth fields. `status` is `ACTIVE`,
-  `INACTIVE` or `INVITED`, so a user can exist before accepting an invitation.
+- **User** — `email` is globally unique. `passwordHash` holds an Argon2id hash and
+  is **nullable**: an invited user exists before setting a password, and the seed
+  deliberately creates the owner without one. It never leaves the backend. There
+  are still no `refreshToken` or OAuth fields. `status` is `ACTIVE`, `INACTIVE` or
+  `INVITED`, so a user can exist before accepting an invitation.
 - **Membership** — roles are `OWNER`, `ADMIN`, `MANAGER`, `MEMBER`. A user cannot
   join the same organization twice.
 - **Client** — `type` is `PERSON` or `COMPANY`. `documentType`, `documentNumber`,
@@ -65,6 +68,12 @@ filter without a join. The application is responsible for keeping a task's
   permissions derive from `Membership` until a real need appears.
 - **Task** — `position` is a manual ordering slot for a future Kanban board.
   `completedAt` is separate from `status` so completion time survives status edits.
+- **Session** — the server-side half of a login, which is what makes a refresh
+  token revocable. Stores a SHA-256 fingerprint of the current refresh token,
+  never the token itself. `userAgent` and `ipAddress` are recorded for auditing;
+  `revokedAt` marks logout or detected reuse. It carries `organizationId` because
+  a session is scoped to one organization context at a time — switching
+  organization moves the session. See [AUTHENTICATION.md](./AUTHENTICATION.md).
 
 ## Relationships
 
@@ -73,12 +82,14 @@ Organization
 ├── Membership
 ├── Client
 ├── Project
-└── Task
+├── Task
+└── Session
 
 User
 ├── Membership
 ├── ProjectMember
-└── Task (as assignee)
+├── Task (as assignee)
+└── Session
 
 Client
 └── Project
@@ -102,6 +113,8 @@ erDiagram
     CLIENT |o--o{ PROJECT : has
     PROJECT ||--o{ PROJECT_MEMBER : contains
     PROJECT ||--o{ TASK : contains
+    USER ||--o{ SESSION : opens
+    ORGANIZATION ||--o{ SESSION : scopes
 ```
 
 ## Delete behaviour
@@ -150,6 +163,9 @@ single-column index on `organizationId` would be redundant.
 | `Task`          | `projectId + status + position`   | Kanban board: column, in order.        |
 | `Task`          | `organizationId + status`         | Organization-wide task views.          |
 | `Task`          | `assigneeId`                      | A user's assigned tasks.               |
+| `Session`       | `userId`                          | Revoke every session of a user.        |
+| `Session`       | `organizationId`                  | Sessions within an organization.       |
+| `Session`       | `expiresAt`                       | Future cleanup of expired rows.        |
 
 ## Conventions
 
@@ -193,7 +209,9 @@ pnpm prisma:seed
 
 It is **idempotent** — every write is an `upsert` on a unique constraint, so
 running it repeatedly never duplicates data. It stores no passwords and uses a
-`.local` address rather than a real mailbox.
+`.local` address rather than a real mailbox. The owner is created **without a
+password**; set one with `pnpm auth:bootstrap-owner` — see
+[AUTHENTICATION.md](./AUTHENTICATION.md).
 
 ## Health check
 

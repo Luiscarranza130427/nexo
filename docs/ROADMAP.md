@@ -7,7 +7,7 @@ Phases are built in order. Nothing from a later phase is implemented early.
 | 1     | Environment and Git              | ✅ Done        |
 | 2     | Monorepo and base applications   | ✅ Done        |
 | 3     | Database and Prisma              | ✅ Done        |
-| 4     | Authentication and RBAC          | ⬜ Not started |
+| 4     | Authentication and RBAC          | ✅ Done        |
 | 5     | Design system and layout         | ⬜ Not started |
 | 6     | Clients                          | ⬜ Not started |
 | 7     | Projects                         | ⬜ Not started |
@@ -29,8 +29,10 @@ first commit.
 **3 — Database and Prisma.** PostgreSQL, Prisma schema, migrations, and the data
 access layer inside `apps/api`.
 
-**4 — Authentication and RBAC.** JWT with refresh tokens, session handling, roles
-and permission checks on every write.
+**4 — Authentication and RBAC.** Argon2id passwords, JWT access tokens, rotating
+refresh tokens backed by revocable sessions, organization context and switching,
+role checks re-read from the database, rate limiting and API hardening. See
+[AUTHENTICATION.md](./AUTHENTICATION.md) and [SECURITY.md](./SECURITY.md).
 
 **5 — Design system and layout.** shadcn/ui, the application shell, navigation,
 typography and the visual language. Includes replacing the placeholder favicon.

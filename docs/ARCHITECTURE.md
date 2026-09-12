@@ -4,26 +4,43 @@
 
 ```
 Browser
-   |
-   v
-Next.js   ->  apps/web   (UI, routing, rendering)
-   |
-   v  HTTP
-NestJS    ->  apps/api   (HTTP API, business logic)
-   |
-   v
-Prisma                   (data access, query building)
-   |
-   v
-PostgreSQL               (persistence)
+   │  Authorization: Bearer <access token>
+   ▼
+Next.js          apps/web    (UI, routing, rendering)
+   │  HTTP
+   ▼
+NestJS           apps/api
+   ├── ThrottlerGuard        rate limiting
+   ├── JwtAuthGuard          authenticated by default, @Public() opts out
+   ├── RolesGuard            @Roles(...) re-checked against the database
+   ├── Auth module           login, refresh, logout, organization context
+   └── Prisma                data access
+          │
+          ▼
+      PostgreSQL
 ```
 
-Three rules hold this together:
+The refresh token travels on a separate, narrower path:
+
+```
+Browser
+   └── HttpOnly cookie (nexo_refresh, Path=/auth)
+           │
+           ▼
+       NestJS auth
+           │
+           ▼
+       Session row in PostgreSQL   (SHA-256 fingerprint, revocable)
+```
+
+Four rules hold this together:
 
 - **The frontend never accesses PostgreSQL directly.** It only calls the API over HTTP.
 - **The frontend never imports Prisma.** Prisma is a backend dependency and is
   installed only in `apps/api`.
 - **All persistence logic goes through the API.** There is no second path to the data.
+- **All authorization happens in the backend.** Roles and organization membership
+  are read from the database, never taken from a token or from client input.
 
 ## Repository layout
 
@@ -37,13 +54,16 @@ nexo/
 │       │   ├── migrations/       Committed migration history
 │       │   └── seed.ts           Idempotent development seed
 │       ├── prisma.config.ts      Prisma 7 CLI configuration
+│       ├── scripts/              Operational scripts (bootstrap-owner)
 │       └── src/
+│           ├── auth/             AuthModule: login, sessions, guards, RBAC
 │           ├── database/         DatabaseModule + PrismaService
 │           └── generated/        Prisma Client (generated, not committed)
 ├── packages/
 │   ├── config/               Shared configuration (TypeScript base config)
 │   └── types/                Types shared between frontend and backend
-├── docs/                     Product, requirements, architecture, database, conventions, roadmap
+├── docs/                     Product, requirements, architecture, database,
+│                             authentication, security, conventions, roadmap
 └── .github/                  Reserved for CI/CD workflows (phase 13)
 ```
 
@@ -101,6 +121,18 @@ The API reads `process.env.PORT` and falls back to `3001`.
 
 Failures never expose connection strings, driver messages or stack traces.
 
+## Authentication layer
+
+See [AUTHENTICATION.md](./AUTHENTICATION.md) and [SECURITY.md](./SECURITY.md). In short:
+
+- Short-lived JWT access token in the `Authorization` header; long-lived refresh
+  token in an HttpOnly cookie, backed by a revocable `Session` row.
+- Refresh tokens rotate on every use, and replaying a rotated one revokes the session.
+- Passwords are hashed with Argon2id; `passwordHash` never leaves the backend.
+- Routes are authenticated by default; `@Public()` is the only way to open one.
+- `Organization` is the tenant boundary, resolved from the session, never from
+  client input.
+
 ## Shared types
 
 `packages/types` is consumed as a **type-only** dependency:
@@ -116,6 +148,7 @@ without revisiting this setup.
 
 ## Not in the architecture yet
 
-Authentication, authorization, caching, queues, file storage, email, real-time
-transport and containerization are all deliberately absent. They are planned in
+Caching, queues, file storage, email, real-time transport, containerization,
+two-factor authentication, OAuth, password reset and invitations are all
+deliberately absent. They are planned in
 [ROADMAP.md](./ROADMAP.md) and must not be introduced ahead of schedule.

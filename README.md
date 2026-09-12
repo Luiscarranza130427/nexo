@@ -28,7 +28,8 @@ nexo/
 ├── packages/
 │   ├── config/     Shared configuration
 │   └── types/      Types shared between frontend and backend
-└── docs/           Product, requirements, architecture, conventions, roadmap
+└── docs/           Product, requirements, architecture, database,
+                    authentication, security, conventions, roadmap
 ```
 
 ## Development
@@ -67,8 +68,12 @@ respective folders before configuring anything environment-specific.
 
 🚧 Under active development.
 
-Phase 2 of 13 complete: the monorepo, a minimal frontend and a minimal API are in
-place. No product features are implemented yet — see
-[docs/ROADMAP.md](./docs/ROADMAP.md).
+Phase 4 of 13 complete: monorepo, frontend and API skeletons, PostgreSQL with
+Prisma, and authentication with sessions and RBAC. No product features (clients,
+projects, tasks) are implemented yet — see [docs/ROADMAP.md](./docs/ROADMAP.md).
+
+Setting up locally also needs a database and the first owner account:
+[docs/DATABASE.md](./docs/DATABASE.md) and
+[docs/AUTHENTICATION.md](./docs/AUTHENTICATION.md).
 
 Contributors and AI agents must read [AGENTS.md](./AGENTS.md) before making changes.

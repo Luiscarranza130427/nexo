@@ -6,9 +6,11 @@ packages:
 # - sharp / unrs-resolver: required by Next.js (image optimization, ESLint import resolver).
 # - prisma / @prisma/engines: fetch the Prisma query and schema engines.
 # - esbuild: native binary used by tsx to run the TypeScript seed script.
+# - argon2: native password-hashing binding.
 onlyBuiltDependencies:
   - sharp
   - unrs-resolver
   - prisma
   - '@prisma/engines'
   - esbuild
+  - argon2

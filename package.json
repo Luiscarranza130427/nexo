@@ -24,6 +24,7 @@
     "prisma:status": "pnpm --filter @nexo/api prisma:status",
     "prisma:seed": "pnpm --filter @nexo/api prisma:seed",
     "prisma:studio": "pnpm --filter @nexo/api prisma:studio",
+    "auth:bootstrap-owner": "pnpm --filter @nexo/api auth:bootstrap-owner",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
