@@ -142,18 +142,30 @@ model Client {
   email          String?
   phone          String?
   address        String?
-  status         ClientStatus @default(ACTIVE)
+  /// A client is a prospect until there is real work; marking them ACTIVE
+  /// on creation would overstate the relationship.
+  status         ClientStatus @default(PROSPECT)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   projects     Project[]
 
-  // Both composite indexes lead with organizationId, so they also cover plain
-  // tenant scoping. Lookups are always tenant-scoped; a bare name or
-  // documentNumber index would never be used.
+  // A document number identifies a client within its organization, never
+  // globally: two organizations may legitimately deal with the same company.
+  // documentNumber is nullable and PostgreSQL treats each NULL as distinct, so
+  // any number of clients without a document still coexist. This also replaces
+  // the former plain index — a unique constraint is backed by one.
+  @@unique([organizationId, documentNumber])
+  // Every index leads with organizationId, so each also covers plain tenant
+  // scoping; a bare column index would never be used.
   @@index([organizationId, name])
-  @@index([organizationId, documentNumber])
+  // Default list ordering: newest first within the organization.
+  @@index([organizationId, createdAt])
+  // The status filter is the selective one. `type` is deliberately not indexed:
+  // with two possible values it would barely narrow anything the
+  // organizationId prefix has not already narrowed.
+  @@index([organizationId, status])
 }
 
 /// Work delivered by the organization, optionally for a client.

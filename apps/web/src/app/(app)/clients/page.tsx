@@ -1,15 +1,29 @@
 import type { Metadata } from 'next';
-import { Building2 } from 'lucide-react';
-import { ModulePlaceholder } from '@/components/shared/module-placeholder';
+import { Suspense } from 'react';
+import { PageHeader } from '@/components/shared/page-header';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ClientsView } from '@/features/clients/components/clients-view';
 
 export const metadata: Metadata = { title: 'Clientes' };
 
-export default function Page() {
+/**
+ * `ClientsView` reads the URL through `useSearchParams`, which Next requires to
+ * sit inside a Suspense boundary so the shell can still be prerendered.
+ */
+export default function ClientsPage() {
   return (
-    <ModulePlaceholder
-      title="Clientes"
-      description="Empresas y contactos con los que trabaja tu equipo."
-      icon={Building2}
-    />
+    <Suspense
+      fallback={
+        <>
+          <PageHeader
+            title="Clientes"
+            description="Gestiona las personas y empresas con las que trabaja tu organización."
+          />
+          <Skeleton className="h-80 w-full rounded-xl" />
+        </>
+      }
+    >
+      <ClientsView />
+    </Suspense>
   );
 }

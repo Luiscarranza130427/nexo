@@ -5,6 +5,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
+import { ClientsModule } from './clients/clients.module.js';
 import { DatabaseModule } from './database/database.module.js';
 
 @Module({
@@ -27,6 +28,7 @@ import { DatabaseModule } from './database/database.module.js';
     }),
     DatabaseModule,
     AuthModule,
+    ClientsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

@@ -9,7 +9,7 @@ Phases are built in order. Nothing from a later phase is implemented early.
 | 3     | Database and Prisma              | ✅ Done        |
 | 4     | Authentication and RBAC          | ✅ Done        |
 | 5     | Design system and layout         | ✅ Done        |
-| 6     | Clients                          | ⬜ Not started |
+| 6     | Clients                          | ✅ Done        |
 | 7     | Projects                         | ⬜ Not started |
 | 8     | Tasks                            | ⬜ Not started |
 | 9     | Team                             | ⬜ Not started |
@@ -38,7 +38,9 @@ role checks re-read from the database, rate limiting and API hardening. See
 dark themes, the application shell (sidebar, header, user menu), the login screen,
 session bootstrap and organization switching. See [FRONTEND.md](./FRONTEND.md).
 
-**6 — Clients.** First real domain area: CRUD, list and detail views, validation.
+**6 — Clients.** First real domain area: CRUD with pagination, search, filters
+and sorting; per-organization document uniqueness; role-aware UI. See
+[CLIENTS.md](./CLIENTS.md).
 
 **7 — Projects.** Projects tied to clients, with status and ownership.
 

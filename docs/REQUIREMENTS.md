@@ -1,7 +1,7 @@
 # Requirements
 
-Nothing in this document is implemented yet. It records what Nexo is expected to
-do so that scope stays explicit as the product is built.
+Records what Nexo is expected to do, so scope stays explicit as the product is
+built. Items are marked as they land; everything unmarked is still pending.
 
 ## MVP
 
@@ -9,13 +9,17 @@ The smallest version of Nexo that a team could actually run its operations on.
 
 ### Accounts and access
 
-- Email and password authentication with refresh tokens.
-- Role-based access control: at minimum `admin` and `member`.
-- A user belongs to one organization.
+- ✅ Email and password authentication with refresh tokens.
+- ✅ Role-based access control: `OWNER`, `ADMIN`, `MANAGER`, `MEMBER`.
+- ✅ A user belongs to one or more organizations and can switch between them.
 
 ### Core records
 
-- **Clients** — create, edit, archive; name, contact details, notes.
+- **Clients** — ✅ implemented. Create, edit and delete; person or company,
+  identification document, contact details and address; `ACTIVE` / `INACTIVE` /
+  `PROSPECT` status used to retire a client rather than deleting them. Listing
+  supports search, filters, sorting and server-side pagination, and every
+  operation is scoped to the organization. See [CLIENTS.md](./CLIENTS.md).
 - **Projects** — belong to a client; have a status and an owner.
 - **Tasks** — belong to a project; have an assignee, a status and a due date.
 - **Team** — invite users, assign roles, deactivate users.

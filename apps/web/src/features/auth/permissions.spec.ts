@@ -30,6 +30,28 @@ describe('can', () => {
   });
 });
 
+describe('client capabilities', () => {
+  it('lets OWNER and ADMIN do everything with clients', () => {
+    for (const role of ['OWNER', 'ADMIN'] as const) {
+      expect(can(role, 'clients:create')).toBe(true);
+      expect(can(role, 'clients:update')).toBe(true);
+      expect(can(role, 'clients:delete')).toBe(true);
+    }
+  });
+
+  it('lets MANAGER create and edit but never delete', () => {
+    expect(can('MANAGER', 'clients:create')).toBe(true);
+    expect(can('MANAGER', 'clients:update')).toBe(true);
+    expect(can('MANAGER', 'clients:delete')).toBe(false);
+  });
+
+  it('limits MEMBER to reading', () => {
+    expect(can('MEMBER', 'clients:create')).toBe(false);
+    expect(can('MEMBER', 'clients:update')).toBe(false);
+    expect(can('MEMBER', 'clients:delete')).toBe(false);
+  });
+});
+
 describe('ROLE_LABELS', () => {
   it('humanizes every role, so the interface never shows OWNER verbatim', () => {
     expect(Object.values(ROLE_LABELS)).toEqual([

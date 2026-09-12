@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { usePathname } from 'next/navigation';
 import { Fragment } from 'react';
 import {
@@ -12,6 +13,8 @@ import {
 } from '@/components/ui/breadcrumb';
 import { ROUTE_LABELS } from '@/config/navigation';
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /** Turns an unknown segment into something readable: `my-page` → `My page`. */
 function humanize(segment: string): string {
   const spaced = segment.replace(/-/g, ' ');
@@ -19,10 +22,27 @@ function humanize(segment: string): string {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
-/** Breadcrumb derived from the URL, so nested routes work without extra wiring. */
+/**
+ * Breadcrumb derived from the URL, so nested routes work without extra wiring.
+ *
+ * A record id in the path would otherwise render as a raw UUID. Instead it is
+ * resolved from the query cache using the module's own key convention
+ * (`[resource, 'detail', id]`), which every feature follows — so this stays
+ * generic and does not import anything from a specific module. `enabled: false`
+ * means it only ever reads the cache: it subscribes to updates but never fetches.
+ */
 export function NavBreadcrumb() {
   const pathname = usePathname();
   const segments = pathname.split('/').filter(Boolean);
+
+  const idIndex = segments.findIndex((segment) => UUID.test(segment));
+  const resource = idIndex > 0 ? segments[idIndex - 1] : undefined;
+  const recordId = idIndex >= 0 ? segments[idIndex] : undefined;
+
+  const { data: record } = useQuery<{ name?: string }>({
+    queryKey: resource && recordId ? [resource, 'detail', recordId] : ['__no-record__'],
+    enabled: false,
+  });
 
   if (segments.length === 0) {
     return null;
@@ -30,8 +50,17 @@ export function NavBreadcrumb() {
 
   const crumbs = segments.map((segment, index) => {
     const href = `/${segments.slice(0, index + 1).join('/')}`;
+    const known = ROUTE_LABELS[href];
 
-    return { href, label: ROUTE_LABELS[href] ?? humanize(segment) };
+    if (known) {
+      return { href, label: known };
+    }
+
+    if (index === idIndex) {
+      return { href, label: record?.name ?? 'Detalle' };
+    }
+
+    return { href, label: humanize(segment) };
   });
 
   return (
@@ -44,9 +73,13 @@ export function NavBreadcrumb() {
             <Fragment key={crumb.href}>
               <BreadcrumbItem>
                 {last ? (
-                  <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                  <BreadcrumbPage className="max-w-40 truncate sm:max-w-none">
+                    {crumb.label}
+                  </BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink href={crumb.href}>{crumb.label}</BreadcrumbLink>
+                  <BreadcrumbLink href={crumb.href} className="max-w-32 truncate sm:max-w-none">
+                    {crumb.label}
+                  </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
               {!last ? <BreadcrumbSeparator /> : null}

@@ -103,3 +103,88 @@ export type OrganizationChoiceRequired = {
   code: 'ORGANIZATION_REQUIRED';
   organizations: OrganizationSummary[];
 };
+
+// ---------------------------------------------------------------------------
+// Pagination
+// ---------------------------------------------------------------------------
+
+export type PaginationMeta = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+/** Standard envelope for every paginated list the API returns. */
+export type Paginated<T> = {
+  data: T[];
+  meta: PaginationMeta;
+};
+
+// ---------------------------------------------------------------------------
+// Clients
+// ---------------------------------------------------------------------------
+
+/**
+ * Plain unions rather than re-exports of the Prisma enums: the frontend must
+ * not depend on the persistence layer. `clients.contract.spec.ts` asserts these
+ * stay in sync with the database.
+ */
+export type ClientType = 'PERSON' | 'COMPANY';
+
+export type ClientStatus = 'ACTIVE' | 'INACTIVE' | 'PROSPECT';
+
+/**
+ * A client as the API returns it.
+ *
+ * `organizationId` is deliberately absent: the tenant is implied by the
+ * session, and echoing it back would only invite the frontend to send it.
+ * Timestamps are ISO strings, which is what JSON carries.
+ */
+export type Client = {
+  id: string;
+  type: ClientType;
+  name: string;
+  documentType: string | null;
+  documentNumber: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  status: ClientStatus;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ClientSortField = 'name' | 'createdAt' | 'updatedAt';
+
+export type SortOrder = 'asc' | 'desc';
+
+/** Query accepted by `GET /clients`. Every field is optional. */
+export type ClientListQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: ClientStatus;
+  type?: ClientType;
+  sortBy?: ClientSortField;
+  sortOrder?: SortOrder;
+};
+
+/** Body of `POST /clients`. */
+export type CreateClientInput = {
+  type: ClientType;
+  name: string;
+  documentType?: string | null;
+  documentNumber?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  status?: ClientStatus;
+};
+
+/** Body of `PATCH /clients/:id`. Partial by design. */
+export type UpdateClientInput = Partial<CreateClientInput>;
+
+/** Error codes specific to the clients module. */
+export type ClientErrorCode =
+  'CLIENT_NOT_FOUND' | 'CLIENT_DOCUMENT_ALREADY_EXISTS' | 'CLIENT_HAS_PROJECTS';
