@@ -1,10 +1,27 @@
-export default function HomePage() {
-  return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-2 px-6 text-center">
-      <h1 className="text-5xl font-semibold tracking-tight">Nexo</h1>
-      <p className="text-lg text-neutral-300">Internal Operations Platform</p>
-      <p className="text-sm text-neutral-500">A NovaTec Product</p>
-      <p className="mt-8 text-sm text-neutral-400">Environment ready.</p>
-    </main>
-  );
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { LoadingScreen } from '@/components/shared/loading-screen';
+import { useAuth } from '@/features/auth/auth-provider';
+
+/**
+ * The root route is a router, not a page.
+ *
+ * There is no public landing in this phase: people either have a session and
+ * belong in the app, or they need to sign in.
+ */
+export default function RootPage() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
+    router.replace(isAuthenticated ? '/dashboard' : '/login');
+  }, [isAuthenticated, isLoading, router]);
+
+  return <LoadingScreen />;
 }

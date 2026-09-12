@@ -76,6 +76,14 @@ export type AuthTokens = AuthSession & {
   accessToken: string;
 };
 
+/** Credentials submitted to the login endpoint. */
+export type LoginRequest = {
+  email: string;
+  password: string;
+  /** Required only when the user belongs to more than one organization. */
+  organizationId?: string;
+};
+
 /** Stable, machine-readable error codes returned by the auth endpoints. */
 export type AuthErrorCode =
   | 'INVALID_CREDENTIALS'

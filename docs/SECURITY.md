@@ -18,10 +18,19 @@ for how the auth flow itself works.
 
 ## Token storage
 
-| Token   | Lives in             | Why                                               |
-| ------- | -------------------- | ------------------------------------------------- |
-| Access  | Memory on the client | Short-lived; never persisted by the API.          |
-| Refresh | HttpOnly cookie      | Unreadable by JavaScript, so XSS cannot steal it. |
+| Token   | Lives in                             | Why                                               |
+| ------- | ------------------------------------ | ------------------------------------------------- |
+| Access  | A module variable in the browser tab | Short-lived, never persisted anywhere.            |
+| Refresh | HttpOnly cookie                      | Unreadable by JavaScript, so XSS cannot steal it. |
+
+The frontend keeps the access token in **memory only** — never localStorage,
+sessionStorage or IndexedDB, and it never reads `document.cookie` for the
+refresh token. Losing the access token on reload is intended: the HttpOnly
+cookie restores the session through `/auth/refresh`.
+
+Refresh on the client is **single-flight**. Two concurrent refreshes would both
+present the same cookie, and the API would correctly read the second as reuse
+and revoke the session, so every caller awaits one shared request.
 
 **Refresh tokens are never stored in `localStorage`** — anything JavaScript can
 read, an injected script can exfiltrate.
@@ -132,6 +141,14 @@ nothing about a DTO's shape.
   makes every public endpoint an explicit, reviewable decision.
 - The session row is re-validated on every request, so logout is immediate rather
   than eventual.
+- **Frontend route protection is UX, never a security boundary.** The redirects
+  in `apps/web` and the `can()` helper that hides menu options exist so people
+  are not shown things they cannot use. They stop nobody: anyone can edit client
+  state. The NestJS API is the only authority, and it re-reads user, organization
+  and membership from PostgreSQL on every request.
+- The interface never receives anything it must not see: `passwordHash`,
+  `refreshTokenHash` and session internals are absent from every type in
+  `@nexo/types`, and end-to-end tests assert that no response body contains them.
 
 ## Multi-tenant boundary
 

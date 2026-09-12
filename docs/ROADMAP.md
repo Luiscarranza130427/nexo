@@ -8,7 +8,7 @@ Phases are built in order. Nothing from a later phase is implemented early.
 | 2     | Monorepo and base applications   | ✅ Done        |
 | 3     | Database and Prisma              | ✅ Done        |
 | 4     | Authentication and RBAC          | ✅ Done        |
-| 5     | Design system and layout         | ⬜ Not started |
+| 5     | Design system and layout         | ✅ Done        |
 | 6     | Clients                          | ⬜ Not started |
 | 7     | Projects                         | ⬜ Not started |
 | 8     | Tasks                            | ⬜ Not started |
@@ -34,8 +34,9 @@ refresh tokens backed by revocable sessions, organization context and switching,
 role checks re-read from the database, rate limiting and API hardening. See
 [AUTHENTICATION.md](./AUTHENTICATION.md) and [SECURITY.md](./SECURITY.md).
 
-**5 — Design system and layout.** shadcn/ui, the application shell, navigation,
-typography and the visual language. Includes replacing the placeholder favicon.
+**5 — Design system and layout.** shadcn/ui on semantic design tokens, light and
+dark themes, the application shell (sidebar, header, user menu), the login screen,
+session bootstrap and organization switching. See [FRONTEND.md](./FRONTEND.md).
 
 **6 — Clients.** First real domain area: CRUD, list and detail views, validation.
 

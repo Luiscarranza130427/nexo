@@ -19,6 +19,8 @@
     "lint:web": "pnpm --filter @nexo/web lint",
     "lint:api": "pnpm --filter @nexo/api lint",
     "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test",
+    "test:e2e": "pnpm --filter @nexo/api test:e2e",
     "prisma:generate": "pnpm --filter @nexo/api prisma:generate",
     "prisma:migrate": "pnpm --filter @nexo/api prisma:migrate",
     "prisma:status": "pnpm --filter @nexo/api prisma:status",

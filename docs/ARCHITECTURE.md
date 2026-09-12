@@ -4,10 +4,14 @@
 
 ```
 Browser
-   │  Authorization: Bearer <access token>
+   │
    ▼
-Next.js          apps/web    (UI, routing, rendering)
-   │  HTTP
+Next.js          apps/web
+   ├── AuthProvider          session state, bootstrap, organization context
+   ├── TanStack Query        server state for business data
+   └── API client            one fetch wrapper: credentials, errors, refresh
+   │
+   │  Authorization: Bearer <access token>
    ▼
 NestJS           apps/api
    ├── ThrottlerGuard        rate limiting
@@ -41,6 +45,7 @@ Four rules hold this together:
 - **All persistence logic goes through the API.** There is no second path to the data.
 - **All authorization happens in the backend.** Roles and organization membership
   are read from the database, never taken from a token or from client input.
+  Route guards and hidden menu items in the frontend are UX only.
 
 ## Repository layout
 
@@ -63,7 +68,7 @@ nexo/
 │   ├── config/               Shared configuration (TypeScript base config)
 │   └── types/                Types shared between frontend and backend
 ├── docs/                     Product, requirements, architecture, database,
-│                             authentication, security, conventions, roadmap
+│                             authentication, security, frontend, conventions, roadmap
 └── .github/                  Reserved for CI/CD workflows (phase 13)
 ```
 
@@ -132,6 +137,12 @@ See [AUTHENTICATION.md](./AUTHENTICATION.md) and [SECURITY.md](./SECURITY.md). I
 - Routes are authenticated by default; `@Public()` is the only way to open one.
 - `Organization` is the tenant boundary, resolved from the session, never from
   client input.
+
+## Frontend
+
+See [FRONTEND.md](./FRONTEND.md). In short: App Router with `(auth)` and `(app)`
+route groups, shadcn/ui on semantic design tokens, light/dark/system theming,
+an access token held in memory only, and a single-flight automatic refresh.
 
 ## Shared types
 

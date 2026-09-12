@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
-import type { AuthSession, AuthTokens } from '@nexo/types';
+import type { AuthSession, AuthTokens, OrganizationSummary } from '@nexo/types';
 import type { CookieOptions, Request, Response } from 'express';
 import { AuthService, type AuthResult, type RequestMeta } from './auth.service.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
@@ -111,6 +111,17 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() auth: AuthContext): Promise<AuthSession> {
     return this.auth.me(auth);
+  }
+
+  /**
+   * Organizations the caller may switch into.
+   *
+   * The interface needs this to decide whether to offer a switcher at all;
+   * `/auth/me` only reports the active one. Returns id, name and slug only.
+   */
+  @Get('organizations')
+  listOrganizations(@CurrentUser() auth: AuthContext): Promise<OrganizationSummary[]> {
+    return this.auth.listOrganizations(auth);
   }
 
   /** Revokes the server-side session, not just the browser cookie. */

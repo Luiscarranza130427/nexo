@@ -231,6 +231,40 @@ describe('Authentication (e2e)', () => {
     });
   });
 
+  describe('GET /auth/organizations', () => {
+    it('requires authentication', async () => {
+      await request(app.getHttpServer()).get('/auth/organizations').expect(401);
+    });
+
+    it('lists the organizations the caller belongs to', async () => {
+      const { accessToken } = await login(primaryOrgId);
+
+      const response = await request(app.getHttpServer())
+        .get('/auth/organizations')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveLength(2);
+      // Only what an organization chooser needs.
+      expect(Object.keys(response.body[0]).sort()).toEqual(['id', 'name', 'slug']);
+    });
+
+    it('does not leak organizations the caller has no membership in', async () => {
+      const memberLogin = await request(app.getHttpServer())
+        .post('/auth/login')
+        .send({ email: MEMBER_EMAIL, password: PASSWORD })
+        .expect(200);
+
+      const response = await request(app.getHttpServer())
+        .get('/auth/organizations')
+        .set('Authorization', `Bearer ${memberLogin.body.accessToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveLength(1);
+      expect(response.body[0].id).toBe(primaryOrgId);
+    });
+  });
+
   describe('POST /auth/refresh', () => {
     it('rotates the refresh token', async () => {
       const { cookie } = await login(primaryOrgId);

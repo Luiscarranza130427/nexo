@@ -6,7 +6,7 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { AuthSession, AuthTokens } from '@nexo/types';
+import type { AuthSession, AuthTokens, OrganizationSummary } from '@nexo/types';
 import { PrismaService } from '../database/prisma.service.js';
 import type { LoginDto } from './dto/login.dto.js';
 import { MembershipService } from './membership.service.js';
@@ -222,6 +222,11 @@ export class AuthService {
 
   me(auth: AuthContext): Promise<AuthSession> {
     return this.requireContext(auth.userId, auth.organizationId);
+  }
+
+  /** Active organizations the caller belongs to. */
+  listOrganizations(auth: AuthContext): Promise<OrganizationSummary[]> {
+    return this.memberships.listOrganizations(auth.userId);
   }
 
   async logout(auth: AuthContext): Promise<void> {
