@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import { LoginForm } from '@/components/auth/login-form';
+import { LoginNotice } from '@/components/auth/login-notice';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { NexoMark, NovaTecAttribution } from '@/components/shared/nexo-mark';
 
@@ -49,6 +51,10 @@ export default function LoginPage() {
                 Gestiona proyectos, clientes y operaciones desde un solo lugar.
               </p>
             </div>
+
+            <Suspense fallback={null}>
+              <LoginNotice />
+            </Suspense>
 
             <LoginForm />
 

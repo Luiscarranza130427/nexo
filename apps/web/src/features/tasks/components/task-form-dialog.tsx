@@ -31,10 +31,11 @@ import { useAuth } from '@/features/auth/auth-provider';
 import { can } from '@/features/auth/permissions';
 import { useProjectMembersQuery, useProjectsQuery } from '@/features/projects/hooks/use-projects';
 import { PRIORITIES, PRIORITY_LABELS, toDateInputValue } from '@/features/projects/labels';
+import { errorCodeOf } from '@/lib/api/errors';
 import { useCreateTask, useUpdateTask } from '../hooks/use-tasks';
 import { TASK_STATUSES, TASK_STATUS_LABELS } from '../labels';
 import { taskSchema, type TaskFormOutput, type TaskFormValues } from '../schemas/task-schema';
-import { errorCodeOf, taskErrorMessage } from '../task-errors';
+import { taskErrorMessage } from '../task-errors';
 
 /** Radix Select cannot hold an empty value, so "unassigned" uses a sentinel. */
 const UNASSIGNED = 'NONE';

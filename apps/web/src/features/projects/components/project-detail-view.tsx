@@ -14,9 +14,8 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import type { LucideIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
 import { PersonAvatar } from '@/components/shared/person-avatar';
+import { SectionCard } from '@/components/shared/section-card';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -30,31 +29,6 @@ import { DueDateIndicator, ProjectPriorityBadge, ProjectStatusBadge } from './pr
 import { ProjectDeleteDialog } from './project-delete-dialog';
 import { ProjectMembersDialog } from './project-members-dialog';
 import { ProjectNotFound } from './project-views';
-
-function SectionCard({
-  icon: Icon,
-  title,
-  action,
-  children,
-}: {
-  icon: LucideIcon;
-  title: string;
-  action?: ReactNode;
-  children: ReactNode;
-}) {
-  return (
-    <Card>
-      <CardHeader className="flex-row items-center justify-between gap-2 space-y-0">
-        <CardTitle className="flex items-center gap-2 text-sm font-medium">
-          <Icon className="text-muted-foreground size-4" aria-hidden="true" />
-          {title}
-        </CardTitle>
-        {action}
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
-  );
-}
 
 function DetailSkeleton() {
   return (

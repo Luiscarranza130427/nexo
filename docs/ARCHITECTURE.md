@@ -68,6 +68,7 @@ nexo/
 │           ├── organization/     Organization members endpoint (minimal)
 │           ├── projects/         ProjectsModule: projects, codes, members
 │           ├── tasks/            TasksModule: tasks, board, ordering
+│           ├── team/             TeamModule: members, roles, invitations
 │           └── generated/        Prisma Client (generated, not committed)
 ├── packages/
 │   ├── config/               Shared configuration (TypeScript base config)

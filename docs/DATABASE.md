@@ -46,6 +46,7 @@ filter without a join. The application is responsible for keeping a task's
 | `ProjectMember` | A user assigned to a project.                                         |
 | `Task`          | A unit of work inside a project.                                      |
 | `Session`       | A revocable refresh-token session. One row per active login.          |
+| `Invitation`    | An offer to join an organization with a role, through a hashed link.  |
 
 ### Entity notes
 
@@ -72,6 +73,12 @@ filter without a join. The application is responsible for keeping a task's
   as integers spaced 1000 apart and maintained only by the API. `completedAt` is
   separate from `status` so completion time survives status edits. See
   [TASKS.md](./TASKS.md).
+- **Invitation** — an offer to join an organization as `ADMIN`, `MANAGER` or
+  `MEMBER`. Only a SHA-256 fingerprint of its token is stored (`tokenHash`,
+  unique). `status` is `PENDING`, `ACCEPTED`, `REVOKED` or `EXPIRED`, and a pending
+  row past `expiresAt` is treated as expired. `invitedByUserId` and
+  `acceptedByUserId` are nullable so that deleting a user never erases that
+  history. See [TEAM.md](./TEAM.md).
 - **Session** — the server-side half of a login, which is what makes a refresh
   token revocable. Stores a SHA-256 fingerprint of the current refresh token,
   never the token itself. `userAgent` and `ipAddress` are recorded for auditing;
@@ -87,13 +94,15 @@ Organization
 ├── Client
 ├── Project
 ├── Task
-└── Session
+├── Session
+└── Invitation
 
 User
 ├── Membership
 ├── ProjectMember
 ├── Task (as assignee)
-└── Session
+├── Session
+└── Invitation (as inviter or as the person who accepted)
 
 Client
 └── Project
@@ -119,6 +128,9 @@ erDiagram
     PROJECT ||--o{ TASK : contains
     USER ||--o{ SESSION : opens
     ORGANIZATION ||--o{ SESSION : scopes
+    ORGANIZATION ||--o{ INVITATION : issues
+    USER |o--o{ INVITATION : invites
+    USER |o--o{ INVITATION : accepts
 ```
 
 ## Delete behaviour
@@ -131,12 +143,14 @@ Cascades are chosen per relation, never applied blanket.
 | Organization → Client     | `Cascade` | Tenant data disappears with the tenant.                                           |
 | Organization → Project    | `Cascade` | Same.                                                                             |
 | Organization → Task       | `Cascade` | Same.                                                                             |
+| Organization → Invitation | `Cascade` | Invitations are meaningless without the organization.                             |
 | Project → ProjectMember   | `Cascade` | Assignments are meaningless without the project.                                  |
 | Project → Task            | `Cascade` | A task cannot outlive its project.                                                |
 | Client → Project          | `SetNull` | Deleting a client must not destroy delivered work; the project survives unlinked. |
 | User → Task (assignee)    | `SetNull` | Removing a person must not delete the work; the task becomes unassigned.          |
 | User → Membership         | `Cascade` | Membership is a pure link record.                                                 |
 | User → ProjectMember      | `Cascade` | Also a pure link record; nothing of value is lost.                                |
+| User → Invitation         | `SetNull` | Inviter and acceptor: the invitation's history outlives the person.               |
 
 The API is stricter than these rules in two places: a client with projects and a
 project with tasks cannot be deleted through it. See [CLIENTS.md](./CLIENTS.md)
@@ -150,13 +164,14 @@ single-column index on `organizationId` would be redundant.
 
 **Unique constraints**
 
-| Model           | Constraint                | Meaning                                    |
-| --------------- | ------------------------- | ------------------------------------------ |
-| `Organization`  | `slug`                    | Globally unique tenant handle.             |
-| `User`          | `email`                   | One account per email.                     |
-| `Membership`    | `organizationId + userId` | No duplicate membership.                   |
-| `Project`       | `organizationId + code`   | Project codes are unique per organization. |
-| `ProjectMember` | `projectId + userId`      | No duplicate assignment.                   |
+| Model           | Constraint                | Meaning                                     |
+| --------------- | ------------------------- | ------------------------------------------- |
+| `Organization`  | `slug`                    | Globally unique tenant handle.              |
+| `User`          | `email`                   | One account per email.                      |
+| `Membership`    | `organizationId + userId` | No duplicate membership.                    |
+| `Project`       | `organizationId + code`   | Project codes are unique per organization.  |
+| `ProjectMember` | `projectId + userId`      | No duplicate assignment.                    |
+| `Invitation`    | `tokenHash`               | A token resolves to exactly one invitation. |
 
 **Indexes**
 
@@ -175,6 +190,10 @@ single-column index on `organizationId` would be redundant.
 | `Task`          | `assigneeId`                      | A user's assigned tasks.               |
 | `Task`          | `organizationId + createdAt`      | Default task list ordering.            |
 | `Task`          | `organizationId + dueDate`        | Due-date filters and sorting.          |
+| `Invitation`    | `organizationId + createdAt`      | Invitation list, newest first.         |
+| `Invitation`    | `organizationId + status`         | Invitation status filter.              |
+| `Invitation`    | `organizationId + email`          | Duplicate and pending checks.          |
+| `Invitation`    | `expiresAt`                       | Future cleanup of expired rows.        |
 | `Session`       | `userId`                          | Revoke every session of a user.        |
 | `Session`       | `organizationId`                  | Sessions within an organization.       |
 | `Session`       | `expiresAt`                       | Future cleanup of expired rows.        |

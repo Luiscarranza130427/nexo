@@ -12,7 +12,7 @@ Phases are built in order. Nothing from a later phase is implemented early.
 | 6     | Clients                          | ✅ Done        |
 | 7     | Projects                         | ✅ Done        |
 | 8     | Tasks and Kanban                 | ✅ Done        |
-| 9     | Team                             | ⬜ Not started |
+| 9     | Team and invitations             | ✅ Done        |
 | 10    | Documents                        | ⬜ Not started |
 | 11    | Finances                         | ⬜ Not started |
 | 12    | Calendar and notifications       | ⬜ Not started |
@@ -52,7 +52,9 @@ board per project with drag and drop, keyboard moves and optimistic updates;
 order persisted with spaced positions under a per-project lock; a `MEMBER` works
 only on the tasks assigned to them. See [TASKS.md](./TASKS.md).
 
-**9 — Team.** Users, invitations, role assignment and deactivation.
+**9 — Team and invitations.** Members built on `Membership`, role changes
+within each role's authority, last-owner protection, removal scoped to one
+organization, and secure single-use invitation links. See [TEAM.md](./TEAM.md).
 
 **10 — Documents.** File upload, storage and attachment to records.
 

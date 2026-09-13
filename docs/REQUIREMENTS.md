@@ -29,7 +29,14 @@ The smallest version of Nexo that a team could actually run its operations on.
   filters, sorting and server-side pagination, and a Kanban board per project
   with drag and drop whose order persists. A `MEMBER` works only on the tasks
   assigned to them. See [TASKS.md](./TASKS.md).
-- **Team** — invite users, assign roles, deactivate users.
+- **Team** — ✅ implemented. Member list with search, filters, sorting and
+  server-side pagination; profiles with projects and task counts; role changes
+  within each role's authority, with the last active owner protected; removal
+  from an organization without deleting the account. Deactivating an account
+  across every organization is not built yet. See [TEAM.md](./TEAM.md).
+- **Invitations** — ✅ implemented. Single-use links with a hashed token,
+  expiry and revocation; new people create their account, existing people prove
+  theirs with their password. Links are shared by hand: no email yet.
 
 ### Interface
 

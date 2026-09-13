@@ -12,8 +12,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { errorCodeOf } from '@/lib/api/errors';
 import { useDeleteTask } from '../hooks/use-tasks';
-import { errorCodeOf, taskErrorMessage } from '../task-errors';
+import { taskErrorMessage } from '../task-errors';
 
 export type DeletableTask = { id: string; title: string; project: { id: string } };
 

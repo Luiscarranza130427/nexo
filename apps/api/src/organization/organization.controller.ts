@@ -7,8 +7,8 @@ import { MembershipService } from '../auth/membership.service.js';
  * The organization the caller is acting in.
  *
  * Deliberately minimal: `GET /organization/members` exists so other modules can
- * offer people to pick, which today means assigning project members. Inviting,
- * removing and changing roles belong to the team module, which is not built yet.
+ * offer people to pick, such as project members and task assignees. Inviting,
+ * removing and changing roles belong to the team module (`/team`).
  */
 @Controller('organization')
 export class OrganizationController {

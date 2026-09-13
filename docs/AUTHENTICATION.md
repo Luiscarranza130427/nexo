@@ -1,8 +1,9 @@
 # Authentication
 
-Nexo is an internal platform: **there is no public registration**. Accounts are
-created by administrators, and the very first owner is bootstrapped with the
-script described at the end of this document.
+Nexo is an internal platform: **there is no public registration**. People join
+through an invitation from an owner or an administrator (see
+[TEAM.md](./TEAM.md)), and the very first owner is bootstrapped with the script
+described at the end of this document.
 
 ## Endpoints
 
@@ -150,6 +151,10 @@ check, so changing a role or removing a member takes effect on the next request.
 does _not_ admit an OWNER. List every role that should pass. This is explicit on
 purpose; if a hierarchy is wanted later, it is a small change in one guard.
 
+The team module is the one place with an explicit authority rule between roles —
+who may change or remove whom. It lives in that module's service, not in the
+guard. See [TEAM.md](./TEAM.md).
+
 | Role      | Intent                                                |
 | --------- | ----------------------------------------------------- |
 | `OWNER`   | Full control of the organization.                     |
@@ -171,7 +176,8 @@ No finer-grained permissions exist yet, deliberately.
 | `@CurrentOrganization()` | The active organization id, from the session.         |
 
 Public routes: `GET /`, `GET /health`, `GET /health/db`, `POST /auth/login`,
-`POST /auth/refresh`. Everything else is protected — forgetting to guard a new
+`POST /auth/refresh`, `GET /invitations/:token` and `POST /invitations/accept`.
+Everything else is protected — forgetting to guard a new
 endpoint locks it rather than exposing it.
 
 ## Error codes
@@ -217,7 +223,7 @@ organization; validates the password length; hashes with Argon2id; and stores
 only the hash. It prints neither the password nor the hash.
 
 It refuses to touch a user who is not an owner: this is a bootstrap tool, not a
-password-reset tool. Invitations and password reset arrive in a later phase.
+password-reset tool. Password reset arrives in a later phase.
 
 ## Local development administrator
 

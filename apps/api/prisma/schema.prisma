@@ -37,6 +37,14 @@ enum MembershipRole {
   MEMBER
 }
 
+/// Stored status. A PENDING invitation past its expiresAt is treated as EXPIRED.
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
 enum ClientType {
   PERSON
   COMPANY
@@ -97,6 +105,7 @@ model Organization {
   projects    Project[]
   tasks       Task[]
   sessions    Session[]
+  invitations Invitation[]
 }
 
 /// A person who uses Nexo. Credentials are deliberately absent until phase 4.
@@ -113,10 +122,12 @@ model User {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  memberships        Membership[]
-  projectMemberships ProjectMember[]
-  assignedTasks      Task[]
-  sessions           Session[]
+  memberships         Membership[]
+  projectMemberships  ProjectMember[]
+  assignedTasks       Task[]
+  sessions            Session[]
+  sentInvitations     Invitation[]    @relation("InvitationInvitedBy")
+  acceptedInvitations Invitation[]    @relation("InvitationAcceptedBy")
 }
 
 /// Links a User to an Organization with a role.
@@ -136,6 +147,40 @@ model Membership {
   @@unique([organizationId, userId])
   // "Which organizations does this user belong to?"
   @@index([userId])
+}
+
+/// An offer to join an organization with a role. Stores a SHA-256 fingerprint
+/// of its token, never the token itself. See docs/TEAM.md.
+model Invitation {
+  id               String           @id @default(uuid()) @db.Uuid
+  organizationId   String           @db.Uuid
+  /// Normalized like User.email: trimmed and lowercased.
+  email            String
+  /// ADMIN, MANAGER or MEMBER. The API never issues an OWNER invitation.
+  role             MembershipRole
+  /// SHA-256 of the token. Unique, so a token resolves to exactly one row.
+  tokenHash        String           @unique
+  status           InvitationStatus @default(PENDING)
+  expiresAt        DateTime
+  /// Nullable so that removing a user never erases the invitations they sent.
+  invitedByUserId  String?          @db.Uuid
+  acceptedByUserId String?          @db.Uuid
+  acceptedAt       DateTime?
+  revokedAt        DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User?        @relation("InvitationInvitedBy", fields: [invitedByUserId], references: [id], onDelete: SetNull)
+  acceptedBy   User?        @relation("InvitationAcceptedBy", fields: [acceptedByUserId], references: [id], onDelete: SetNull)
+
+  // Administration list, newest first, and its status filter.
+  @@index([organizationId, createdAt])
+  @@index([organizationId, status])
+  // "Is this address already invited or a member?" before creating another.
+  @@index([organizationId, email])
+  // Future cleanup of long-expired rows.
+  @@index([expiresAt])
 }
 
 /// A customer of the organization.
@@ -230,7 +275,7 @@ model Task {
   status         TaskStatus @default(TODO)
   priority       Priority   @default(MEDIUM)
   assigneeId     String?    @db.Uuid
-  /// Manual ordering slot for a future Kanban board.
+  /// Order inside its board column, maintained by the API. See docs/TASKS.md.
   position       Int        @default(0)
   startDate      DateTime?
   dueDate        DateTime?

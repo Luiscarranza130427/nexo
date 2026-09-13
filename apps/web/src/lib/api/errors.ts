@@ -138,3 +138,14 @@ export function errorMessage(error: unknown): string {
 
   return MESSAGES.UNKNOWN;
 }
+
+/** The machine-readable code an API error carries in its body, when there is one. */
+export function errorCodeOf(error: unknown): string | null {
+  if (!(error instanceof ApiError)) {
+    return null;
+  }
+
+  const code = (error.body as { code?: unknown } | null | undefined)?.code;
+
+  return typeof code === 'string' ? code : null;
+}

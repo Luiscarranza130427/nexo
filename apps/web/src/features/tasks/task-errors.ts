@@ -1,16 +1,5 @@
 import type { TaskErrorCode } from '@nexo/types';
-import { ApiError, errorMessage } from '@/lib/api/errors';
-
-/** The machine-readable code of an API error, when there is one. */
-export function errorCodeOf(error: unknown): string | null {
-  if (!(error instanceof ApiError)) {
-    return null;
-  }
-
-  const code = (error.body as { code?: unknown } | null | undefined)?.code;
-
-  return typeof code === 'string' ? code : null;
-}
+import { errorCodeOf, errorMessage } from '@/lib/api/errors';
 
 /** Wording for every refusal specific to tasks. Anything else uses the shared messages. */
 export const TASK_ERROR_MESSAGES: Record<TaskErrorCode | 'FORBIDDEN', string> = {

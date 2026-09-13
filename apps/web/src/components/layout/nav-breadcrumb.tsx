@@ -22,6 +22,25 @@ const SEGMENT_LABELS: Record<string, string> = {
   board: 'Tablero',
 };
 
+type RecordLabelSource = { code?: string; name?: string; firstName?: string; lastName?: string };
+
+/** A project reads as its code, a client as its name, a person as their full name. */
+function recordLabel(record: RecordLabelSource | undefined): string {
+  if (record?.code) {
+    return record.code;
+  }
+
+  if (record?.name) {
+    return record.name;
+  }
+
+  if (record?.firstName) {
+    return `${record.firstName} ${record.lastName ?? ''}`.trim();
+  }
+
+  return 'Detalle';
+}
+
 /** Turns an unknown segment into something readable: `my-page` → `My page`. */
 function humanize(segment: string): string {
   const spaced = segment.replace(/-/g, ' ');
@@ -47,7 +66,7 @@ export function NavBreadcrumb() {
   const resource = idIndex > 0 ? segments[idIndex - 1] : undefined;
   const recordId = idIndex >= 0 ? segments[idIndex] : undefined;
 
-  const { data: record } = useQuery<{ name?: string; code?: string }>({
+  const { data: record } = useQuery<RecordLabelSource>({
     queryKey: resource && recordId ? [resource, 'detail', recordId] : ['__no-record__'],
     enabled: false,
   });
@@ -65,7 +84,7 @@ export function NavBreadcrumb() {
     }
 
     if (index === idIndex) {
-      return { href, label: record?.code ?? record?.name ?? 'Detalle' };
+      return { href, label: recordLabel(record) };
     }
 
     return { href, label: SEGMENT_LABELS[segment] ?? humanize(segment) };

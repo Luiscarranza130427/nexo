@@ -24,7 +24,8 @@ apps/web/src/
 │   ├── auth/                  Auth provider, state, permissions, schema
 │   ├── clients/               Clients module: api, components, hooks, schemas
 │   ├── projects/              Projects module: api, components, hooks, schemas
-│   └── tasks/                 Tasks module: list, Kanban board, board logic, dialogs
+│   ├── tasks/                 Tasks module: list, Kanban board, board logic, dialogs
+│   └── team/                  Team module: members, roles, invitations, invite page
 ├── lib/api/                   HTTP client, typed calls, error normalization
 ├── lib/format-date.ts         Timestamp formatting shared by modules
 ├── providers/                 Every client provider, composed once
@@ -41,6 +42,9 @@ Two groups with genuinely different chrome:
   people to `/login`.
 
 `/` is a router, not a page: there is no public landing in this phase.
+
+`/invite/[token]` sits outside both groups: it is public, has no shell, and works
+whether or not someone is signed in. See [TEAM.md](./TEAM.md).
 
 **Those redirects are UX, not security.** The real boundary is the NestJS API,
 which authenticates every request and re-reads membership from the database.
@@ -194,7 +198,7 @@ Read in one place. `apps/web/.env` is gitignored; `.env.example` documents it.
 ## Not built yet
 
 Search and notifications render as **disabled** controls rather than faking
-behaviour. Modules not built yet (team, documents, finance, calendar) show an honest
+behaviour. Modules not built yet (documents, finance, calendar) show an honest
 "in construction" state with no invented
 data or charts. Component tests need jsdom and testing-library, which are not
 installed; unit tests cover pure logic only.

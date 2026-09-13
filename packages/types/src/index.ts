@@ -438,3 +438,166 @@ export type TaskErrorCode =
   | 'INVALID_TASK_DATES'
   | 'INVALID_TASK_POSITION'
   | 'TASK_MOVE_FAILED';
+
+// ---------------------------------------------------------------------------
+// Team
+// ---------------------------------------------------------------------------
+
+/** Plain union; `team.contract.spec.ts` asserts it matches the database enum. */
+export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'INVITED';
+
+/** A person in the organization, as the team list shows them. */
+export type TeamMember = {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  avatarUrl: string | null;
+  /** The account's status, which applies across every organization. */
+  status: UserStatus;
+  role: MembershipRole;
+  /** When the membership was created. */
+  joinedAt: string;
+  /** Projects of this organization the person is a member of. */
+  projectsCount: number;
+};
+
+export type TeamSortField = 'name' | 'email' | 'role' | 'joinedAt';
+
+/** Query accepted by `GET /team`. Every field is optional. */
+export type TeamListQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: MembershipRole;
+  status?: UserStatus;
+  sortBy?: TeamSortField;
+  sortOrder?: SortOrder;
+};
+
+/** `GET /team/summary`: head count by role. */
+export type TeamSummary = {
+  total: number;
+  byRole: Record<MembershipRole, number>;
+};
+
+/** A project as listed on a member's profile. */
+export type TeamMemberProject = ProjectReference & {
+  status: ProjectStatus;
+};
+
+/**
+ * `GET /team/:userId`. A MEMBER viewing someone else sees only the projects
+ * they share, and task counts within those projects.
+ */
+export type TeamMemberDetail = TeamMember & {
+  projects: TeamMemberProject[];
+  /** Tasks assigned to the person, by status. */
+  tasks: ProjectTaskSummary;
+};
+
+/** Body of `PATCH /team/:userId/role`. */
+export type ChangeMemberRoleInput = {
+  role: MembershipRole;
+};
+
+export type TeamErrorCode = 'TEAM_MEMBER_NOT_FOUND' | 'LAST_OWNER_REQUIRED';
+
+// ---------------------------------------------------------------------------
+// Invitations
+// ---------------------------------------------------------------------------
+
+/** Plain union; `team.contract.spec.ts` asserts it matches the database enum. */
+export type InvitationStatus = 'PENDING' | 'ACCEPTED' | 'REVOKED' | 'EXPIRED';
+
+/** Ownership is never granted by invitation, only by an owner afterwards. */
+export type InvitableRole = Exclude<MembershipRole, 'OWNER'>;
+
+export type PersonReference = Pick<OrganizationMember, 'userId' | 'firstName' | 'lastName'>;
+
+/** An invitation as the administration list shows it. Never carries the token. */
+export type Invitation = {
+  id: string;
+  email: string;
+  role: InvitableRole;
+  /** Effective status: a pending invitation past its expiry reads as EXPIRED. */
+  status: InvitationStatus;
+  expiresAt: string;
+  createdAt: string;
+  acceptedAt: string | null;
+  revokedAt: string | null;
+  invitedBy: PersonReference | null;
+};
+
+/** Query accepted by `GET /team/invitations`. */
+export type InvitationListQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: InvitationStatus;
+};
+
+/** Body of `POST /team/invitations`. */
+export type CreateInvitationInput = {
+  email: string;
+  role: InvitableRole;
+};
+
+/**
+ * Response of `POST /team/invitations` — the only time the token exists outside
+ * the invitee's link. The API keeps a fingerprint and cannot rebuild the URL.
+ */
+export type CreatedInvitation = {
+  id: string;
+  email: string;
+  role: InvitableRole;
+  expiresAt: string;
+  inviteUrl: string;
+};
+
+/** `GET /invitations/:token`: just enough for the public invitation page. */
+export type InvitationPreview =
+  | {
+      valid: true;
+      status: 'PENDING';
+      organizationName: string;
+      email: string;
+      role: InvitableRole;
+      expiresAt: string;
+      /** Whether the invitee must sign in with an existing account. */
+      accountExists: boolean;
+    }
+  | {
+      valid: false;
+      status: Exclude<InvitationStatus, 'PENDING'>;
+      organizationName: string;
+    };
+
+/**
+ * Body of `POST /invitations/accept`. For an existing account `password`
+ * proves ownership; for a new one it becomes the password, and the names are
+ * required.
+ */
+export type AcceptInvitationInput = {
+  token: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+};
+
+export type AcceptedInvitation = {
+  organization: OrganizationSummary;
+  email: string;
+  role: InvitableRole;
+};
+
+export type InvitationErrorCode =
+  | 'INVITATION_NOT_FOUND'
+  | 'INVITATION_EXPIRED'
+  | 'INVITATION_REVOKED'
+  | 'INVITATION_ALREADY_ACCEPTED'
+  | 'INVITATION_ALREADY_PENDING'
+  | 'INVITATION_ACCOUNT_CHANGED'
+  | 'INVITATION_PROFILE_REQUIRED'
+  | 'INVALID_PASSWORD'
+  | 'USER_ALREADY_MEMBER';

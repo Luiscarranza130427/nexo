@@ -43,6 +43,28 @@ and the comparison runs on every refresh. Comparison is constant-time.
 Access and refresh tokens are signed with **different secrets**. A leaked access
 secret must not allow minting refresh tokens.
 
+## Invitation tokens
+
+- **Generation**: `crypto.randomBytes(32)`, base64url — 256 bits of entropy.
+- **Storage**: only a SHA-256 fingerprint, in a unique column, following the
+  refresh-token principle. The token is returned once, inside the link in the
+  creation response, and cannot be recovered afterwards.
+- **Expiration**: `INVITATION_TTL_DAYS`, default 7. A pending invitation past its
+  expiry is treated as expired by every endpoint, whatever the stored status says.
+- **Single use**: acceptance locks the invitation row and marks it accepted in
+  the same transaction, so two simultaneous acceptances cannot both succeed.
+- **Existing accounts are protected**: accepting for an address that already has
+  an account requires that account's password. A link never sets a password or
+  changes a profile, so holding one is not enough to take over an account.
+- **Limited disclosure**: the public preview returns the organization name, the
+  invited email and role, the expiry and whether an account exists — never ids,
+  the inviter or the fingerprint. Malformed tokens are rejected before any
+  lookup, and both public endpoints are rate limited.
+- **No leakage through the page**: `/invite/[token]` sends no referrer and asks
+  not to be indexed.
+- **Tenant isolation**: invitations are listed, created and revoked only within
+  the session's organization; another organization's invitation answers 404.
+
 ## Cookie security
 
 ```
@@ -94,7 +116,9 @@ nexo_refresh=<token>; HttpOnly; Path=/auth; SameSite=Lax [; Secure]
 ## Rate limiting
 
 `@nestjs/throttler`, applied globally: 120 requests/minute baseline,
-5/minute on `/auth/login`, 20/minute on `/auth/refresh`. Login is the endpoint
+5/minute on `/auth/login`, 20/minute on `/auth/refresh`, 30/minute on
+`GET /invitations/:token` and 10/minute on `POST /invitations/accept`, which
+verifies passwords. Login is the endpoint
 credential stuffing targets, so it gets the tightest budget; ordinary endpoints
 are not crippled.
 
@@ -161,6 +185,10 @@ nothing about a DTO's shape.
   the session.
 - Access tokens naming a stale organization are rejected, so a switch cannot be
   undone by replaying an older token.
+- Removing a member revokes their sessions **in that organization** at once;
+  their sessions in other organizations are untouched.
+- An organization never loses its last active owner: role changes and removals
+  check it under a lock on the organization row.
 
 Row Level Security is **not** implemented. Today the boundary is enforced in the
 application layer; queries in future phases must scope by `organizationId`
@@ -175,7 +203,8 @@ Honest list of what is _not_ protected yet, all scheduled for later phases:
   the API is otherwise `Authorization`-header based, but a cross-site deployment
   using `SameSite=None` would need CSRF protection added.
 - No two-factor authentication, passkeys or OAuth.
-- No password reset or invitation flow.
+- No password reset flow, and no email delivery: invitation links are copied and
+  shared by hand.
 - No account lockout after repeated failures beyond IP rate limiting.
 - No audit log of security events.
 - No automated cleanup of expired sessions.

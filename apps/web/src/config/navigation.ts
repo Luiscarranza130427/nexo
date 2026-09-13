@@ -42,7 +42,8 @@ export const NAVIGATION: NavSection[] = [
   {
     label: 'Organización',
     items: [
-      { href: '/team', label: 'Equipo', icon: Users, capability: 'members:manage' },
+      // Everyone may see the team; managing it is decided per action.
+      { href: '/team', label: 'Equipo', icon: Users },
       { href: '/documents', label: 'Documentos', icon: FileText },
       { href: '/finance', label: 'Finanzas', icon: Wallet, capability: 'organization:manage' },
       { href: '/calendar', label: 'Calendario', icon: CalendarDays },
