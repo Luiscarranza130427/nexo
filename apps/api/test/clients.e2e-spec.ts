@@ -324,6 +324,19 @@ describe('Clients (e2e)', () => {
   describe('POST /clients', () => {
     const payload = { type: 'COMPANY', name: 'Nueva Empresa SAC' };
 
+    it('rejects null for fields that cannot be null', async () => {
+      for (const body of [
+        { ...payload, status: null },
+        { ...payload, type: null },
+      ]) {
+        await request(app.getHttpServer())
+          .post('/clients')
+          .set(asRole('OWNER'))
+          .send(body)
+          .expect(400);
+      }
+    });
+
     it('allows OWNER, ADMIN and MANAGER', async () => {
       for (const role of ['OWNER', 'ADMIN', 'MANAGER'] as Role[]) {
         await request(app.getHttpServer())
@@ -445,6 +458,24 @@ describe('Clients (e2e)', () => {
   });
 
   describe('PATCH /clients/:id', () => {
+    it('rejects null for non-nullable fields but lets optional ones be cleared', async () => {
+      for (const body of [{ name: null }, { type: null }, { status: null }]) {
+        await request(app.getHttpServer())
+          .patch(`/clients/${ownClientId}`)
+          .set(asRole('OWNER'))
+          .send(body)
+          .expect(400);
+      }
+
+      const cleared = await request(app.getHttpServer())
+        .patch(`/clients/${ownClientId}`)
+        .set(asRole('OWNER'))
+        .send({ email: null })
+        .expect(200);
+
+      expect(cleared.body.email).toBeNull();
+    });
+
     it('allows OWNER, ADMIN and MANAGER, and blocks MEMBER', async () => {
       for (const role of ['OWNER', 'ADMIN', 'MANAGER'] as Role[]) {
         await request(app.getHttpServer())

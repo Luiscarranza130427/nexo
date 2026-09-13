@@ -1,5 +1,13 @@
 import { Transform } from 'class-transformer';
-import { IsEmail, IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+  ValidateIf,
+} from 'class-validator';
 import { ClientStatus, ClientType } from '../../generated/prisma/enums.js';
 
 /** Trims a string and turns an empty result into null, so blank inputs clear a field. */
@@ -72,7 +80,8 @@ export class CreateClientDto {
    * courted, and marking them ACTIVE before any work exists would overstate
    * the relationship.
    */
-  @IsOptional()
+  // Validated even when null: the column is not nullable, so null is a 400.
+  @ValidateIf((_object, value) => value !== undefined)
   @IsEnum(ClientStatus)
   status?: ClientStatus;
 }

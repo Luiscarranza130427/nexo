@@ -27,7 +27,8 @@ function humanize(segment: string): string {
  *
  * A record id in the path would otherwise render as a raw UUID. Instead it is
  * resolved from the query cache using the module's own key convention
- * (`[resource, 'detail', id]`), which every feature follows — so this stays
+ * (`[resource, 'detail', id]`), which every feature follows. A record with a
+ * human-readable `code` (projects: NEX-001) is labelled by it, otherwise by `name` — so this stays
  * generic and does not import anything from a specific module. `enabled: false`
  * means it only ever reads the cache: it subscribes to updates but never fetches.
  */
@@ -39,7 +40,7 @@ export function NavBreadcrumb() {
   const resource = idIndex > 0 ? segments[idIndex - 1] : undefined;
   const recordId = idIndex >= 0 ? segments[idIndex] : undefined;
 
-  const { data: record } = useQuery<{ name?: string }>({
+  const { data: record } = useQuery<{ name?: string; code?: string }>({
     queryKey: resource && recordId ? [resource, 'detail', recordId] : ['__no-record__'],
     enabled: false,
   });
@@ -57,7 +58,7 @@ export function NavBreadcrumb() {
     }
 
     if (index === idIndex) {
-      return { href, label: record?.name ?? 'Detalle' };
+      return { href, label: record?.code ?? record?.name ?? 'Detalle' };
     }
 
     return { href, label: humanize(segment) };

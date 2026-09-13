@@ -14,6 +14,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useMemo, useState } from 'react';
 import { EmptyState } from '@/components/shared/empty-state';
 import { PageHeader } from '@/components/shared/page-header';
+import { PaginationControls } from '@/components/shared/pagination-controls';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,7 +22,6 @@ import { useAuth } from '@/features/auth/auth-provider';
 import { can } from '@/features/auth/permissions';
 import { errorMessage } from '@/lib/api/errors';
 import { useClientsQuery } from '../hooks/use-clients';
-import { ClientsPagination } from './clients-pagination';
 import { ClientsTable } from './clients-table';
 import { ClientsToolbar, type ClientsFilters } from './clients-toolbar';
 import { DeleteClientDialog } from './delete-client-dialog';
@@ -196,7 +196,8 @@ export function ClientsView() {
               onDelete={setPendingDelete}
               permissions={permissions}
             />
-            <ClientsPagination
+            <PaginationControls
+              label="Paginación de clientes"
               meta={data.meta}
               onPageChange={(page) => updateParams({ page: String(page) }, false)}
             />

@@ -12,30 +12,5 @@ export const CLIENT_STATUS_LABELS: Record<ClientStatus, string> = {
   INACTIVE: 'Inactivo',
 };
 
-/**
- * Dates for people, not for machines.
- *
- * `Intl.DateTimeFormat` is built into the runtime, so no date library is pulled
- * in just to render a day and a month.
- */
-const dateFormatter = new Intl.DateTimeFormat('es-PE', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-});
-
-const dateTimeFormatter = new Intl.DateTimeFormat('es-PE', {
-  day: '2-digit',
-  month: 'short',
-  year: 'numeric',
-  hour: '2-digit',
-  minute: '2-digit',
-});
-
-export function formatDate(iso: string): string {
-  return dateFormatter.format(new Date(iso));
-}
-
-export function formatDateTime(iso: string): string {
-  return dateTimeFormatter.format(new Date(iso));
-}
+/** Timestamp formatting is shared; re-exported so existing imports keep working. */
+export { formatDate, formatDateTime } from '@/lib/format-date';

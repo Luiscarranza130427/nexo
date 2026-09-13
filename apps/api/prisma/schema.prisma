@@ -78,12 +78,19 @@ enum Priority {
 
 /// A company or team using Nexo. The tenant boundary for every other entity.
 model Organization {
-  id        String             @id @default(uuid()) @db.Uuid
-  name      String
-  slug      String             @unique
-  status    OrganizationStatus @default(ACTIVE)
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
+  id     String             @id @default(uuid()) @db.Uuid
+  name   String
+  slug   String             @unique
+  status OrganizationStatus @default(ACTIVE)
+
+  /// Monotonic counter behind human-readable project codes (NEX-001, NEX-002…).
+  /// Incremented atomically inside the transaction that creates a project, so
+  /// concurrent creates can never collide and a number is never reused — not
+  /// even when the most recent project is deleted.
+  projectCodeSequence Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   memberships Membership[]
   clients     Client[]
@@ -192,6 +199,10 @@ model Project {
   // Also covers tenant scoping by prefix.
   @@unique([organizationId, code])
   @@index([organizationId, status])
+  // Default list ordering: newest first within the organization.
+  @@index([organizationId, createdAt])
+  // "What is due soon" is the operational question this module exists to answer.
+  @@index([organizationId, dueDate])
   @@index([clientId])
 }
 

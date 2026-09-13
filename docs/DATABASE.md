@@ -50,7 +50,9 @@ filter without a join. The application is responsible for keeping a task's
 ### Entity notes
 
 - **Organization** — `slug` is globally unique and will become the tenant handle.
-  `status` is `ACTIVE` / `INACTIVE`.
+  `status` is `ACTIVE` / `INACTIVE`. `projectCodeSequence` is the counter behind project codes: incremented
+  atomically when a project is created and never decremented, so a code is never
+  reused. See [PROJECTS.md](./PROJECTS.md).
 - **User** — `email` is globally unique. `passwordHash` holds an Argon2id hash and
   is **nullable**: an invited user exists before setting a password, and the seed
   deliberately creates the owner without one. It never leaves the backend. There
@@ -63,7 +65,7 @@ filter without a join. The application is responsible for keeping a task's
   captured with a name and nothing else.
 - **Project** — `code` is the human-readable identifier (e.g. `NEX-001`), unique
   per organization rather than globally. `clientId` is optional: internal projects
-  have no client.
+  have no client. The API generates the code; clients never send it.
 - **ProjectMember** — a plain join record. It has no role of its own yet; project
   permissions derive from `Membership` until a real need appears.
 - **Task** — `position` is a manual ordering slot for a future Kanban board.
@@ -134,6 +136,10 @@ Cascades are chosen per relation, never applied blanket.
 | User → Membership         | `Cascade` | Membership is a pure link record.                                                 |
 | User → ProjectMember      | `Cascade` | Also a pure link record; nothing of value is lost.                                |
 
+The API is stricter than these rules in two places: a client with projects and a
+project with tasks cannot be deleted through it. See [CLIENTS.md](./CLIENTS.md)
+and [PROJECTS.md](./PROJECTS.md).
+
 ## Indexes and constraints
 
 Only indexes that serve a real read path. Composite indexes lead with
@@ -159,6 +165,8 @@ single-column index on `organizationId` would be redundant.
 | `Client`        | `organizationId + documentNumber` | Lookup by tax/ID document.             |
 | `Project`       | `organizationId + status`         | Project list filtered by status.       |
 | `Project`       | `clientId`                        | Projects of a client.                  |
+| `Project`       | `organizationId + createdAt`      | Default project list ordering.         |
+| `Project`       | `organizationId + dueDate`        | Sorting by due date.                   |
 | `ProjectMember` | `userId`                          | Projects a user participates in.       |
 | `Task`          | `projectId + status + position`   | Kanban board: column, in order.        |
 | `Task`          | `organizationId + status`         | Organization-wide task views.          |

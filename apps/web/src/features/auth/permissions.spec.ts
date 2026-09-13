@@ -4,7 +4,7 @@ describe('can', () => {
   it('gives an OWNER every capability', () => {
     expect(can('OWNER', 'organization:manage')).toBe(true);
     expect(can('OWNER', 'members:manage')).toBe(true);
-    expect(can('OWNER', 'projects:manage')).toBe(true);
+    expect(can('OWNER', 'projects:delete')).toBe(true);
     expect(can('OWNER', 'workspace:view')).toBe(true);
   });
 
@@ -14,13 +14,13 @@ describe('can', () => {
   });
 
   it('lets a MANAGER manage projects only', () => {
-    expect(can('MANAGER', 'projects:manage')).toBe(true);
+    expect(can('MANAGER', 'projects:update')).toBe(true);
     expect(can('MANAGER', 'members:manage')).toBe(false);
   });
 
   it('limits a MEMBER to viewing', () => {
     expect(can('MEMBER', 'workspace:view')).toBe(true);
-    expect(can('MEMBER', 'projects:manage')).toBe(false);
+    expect(can('MEMBER', 'projects:create')).toBe(false);
     expect(can('MEMBER', 'members:manage')).toBe(false);
   });
 
@@ -49,6 +49,29 @@ describe('client capabilities', () => {
     expect(can('MEMBER', 'clients:create')).toBe(false);
     expect(can('MEMBER', 'clients:update')).toBe(false);
     expect(can('MEMBER', 'clients:delete')).toBe(false);
+  });
+});
+
+describe('project capabilities', () => {
+  it('lets OWNER and ADMIN do everything with projects', () => {
+    for (const role of ['OWNER', 'ADMIN'] as const) {
+      for (const capability of ['create', 'update', 'delete', 'members'] as const) {
+        expect(can(role, `projects:${capability}`)).toBe(true);
+      }
+    }
+  });
+
+  it('lets MANAGER create, edit and staff projects but never delete them', () => {
+    expect(can('MANAGER', 'projects:create')).toBe(true);
+    expect(can('MANAGER', 'projects:update')).toBe(true);
+    expect(can('MANAGER', 'projects:members')).toBe(true);
+    expect(can('MANAGER', 'projects:delete')).toBe(false);
+  });
+
+  it('limits MEMBER to reading', () => {
+    for (const capability of ['create', 'update', 'delete', 'members'] as const) {
+      expect(can('MEMBER', `projects:${capability}`)).toBe(false);
+    }
   });
 });
 

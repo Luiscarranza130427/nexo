@@ -10,7 +10,7 @@ Phases are built in order. Nothing from a later phase is implemented early.
 | 4     | Authentication and RBAC          | ✅ Done        |
 | 5     | Design system and layout         | ✅ Done        |
 | 6     | Clients                          | ✅ Done        |
-| 7     | Projects                         | ⬜ Not started |
+| 7     | Projects                         | ✅ Done        |
 | 8     | Tasks                            | ⬜ Not started |
 | 9     | Team                             | ⬜ Not started |
 | 10    | Documents                        | ⬜ Not started |
@@ -42,7 +42,9 @@ session bootstrap and organization switching. See [FRONTEND.md](./FRONTEND.md).
 and sorting; per-organization document uniqueness; role-aware UI. See
 [CLIENTS.md](./CLIENTS.md).
 
-**7 — Projects.** Projects tied to clients, with status and ownership.
+**7 — Projects.** Projects with optional client, status, priority and dates;
+concurrency-safe per-organization codes that are never reused; team members;
+search, filters, sorting and pagination. See [PROJECTS.md](./PROJECTS.md).
 
 **8 — Tasks.** Tasks inside projects, with assignees, statuses and due dates.
 

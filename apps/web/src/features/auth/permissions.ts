@@ -13,7 +13,10 @@ import type { MembershipRole } from '@nexo/types';
 export type Capability =
   | 'organization:manage'
   | 'members:manage'
-  | 'projects:manage'
+  | 'projects:create'
+  | 'projects:update'
+  | 'projects:delete'
+  | 'projects:members'
   | 'clients:create'
   | 'clients:update'
   | 'clients:delete'
@@ -27,7 +30,10 @@ const CAPABILITIES: Record<MembershipRole, readonly Capability[]> = {
   OWNER: [
     'organization:manage',
     'members:manage',
-    'projects:manage',
+    'projects:create',
+    'projects:update',
+    'projects:delete',
+    'projects:members',
     'clients:create',
     'clients:update',
     'clients:delete',
@@ -35,14 +41,24 @@ const CAPABILITIES: Record<MembershipRole, readonly Capability[]> = {
   ],
   ADMIN: [
     'members:manage',
-    'projects:manage',
+    'projects:create',
+    'projects:update',
+    'projects:delete',
+    'projects:members',
     'clients:create',
     'clients:update',
     'clients:delete',
     'workspace:view',
   ],
   // A manager runs the work but does not destroy records.
-  MANAGER: ['projects:manage', 'clients:create', 'clients:update', 'workspace:view'],
+  MANAGER: [
+    'projects:create',
+    'projects:update',
+    'projects:members',
+    'clients:create',
+    'clients:update',
+    'workspace:view',
+  ],
   MEMBER: ['workspace:view'],
 };
 

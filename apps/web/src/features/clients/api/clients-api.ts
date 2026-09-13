@@ -6,25 +6,14 @@ import type {
   UpdateClientInput,
 } from '@nexo/types';
 import { apiFetch } from '@/lib/api/client';
+import { toQueryString } from '@/lib/api/query-string';
 
 /**
  * Serializes the list query, dropping empty values so the URL stays clean and
  * two equivalent filter states produce the same cache key.
  */
 export function buildClientsQuery(query: ClientListQuery): string {
-  const params = new URLSearchParams();
-
-  for (const [key, value] of Object.entries(query)) {
-    if (value === undefined || value === null || value === '') {
-      continue;
-    }
-
-    params.set(key, String(value));
-  }
-
-  const search = params.toString();
-
-  return search ? `?${search}` : '';
+  return toQueryString(query);
 }
 
 export function fetchClients(query: ClientListQuery): Promise<Paginated<Client>> {

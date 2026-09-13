@@ -20,7 +20,10 @@ The smallest version of Nexo that a team could actually run its operations on.
   `PROSPECT` status used to retire a client rather than deleting them. Listing
   supports search, filters, sorting and server-side pagination, and every
   operation is scoped to the organization. See [CLIENTS.md](./CLIENTS.md).
-- **Projects** — belong to a client; have a status and an owner.
+- **Projects** — ✅ implemented. Optional client, status, priority, start and due
+  dates, an API-generated code unique per organization (`NEX-001`), and assigned
+  team members. Search, filters, sorting and server-side pagination, all scoped to
+  the organization. See [PROJECTS.md](./PROJECTS.md).
 - **Tasks** — belong to a project; have an assignee, a status and a due date.
 - **Team** — invite users, assign roles, deactivate users.
 

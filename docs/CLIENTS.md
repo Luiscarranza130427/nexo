@@ -124,6 +124,9 @@ owner), `email` trimmed and lowercased, `documentType` trimmed and uppercased
 (it is a code), `documentNumber` / `phone` / `address` trimmed. A field that
 trims to empty is stored as `NULL`, so blanking a field in the form clears it.
 
+`null` for a field that cannot be null (`name`, `type`, `status`) is a 400, both
+on create and on update; before phase 7 it reached the database and answered 500.
+
 ## Indexes
 
 Added in `improve_client_constraints`:

@@ -62,7 +62,10 @@ nexo/
 │       ├── scripts/              Operational scripts (bootstrap-owner)
 │       └── src/
 │           ├── auth/             AuthModule: login, sessions, guards, RBAC
+│           ├── clients/          ClientsModule
 │           ├── database/         DatabaseModule + PrismaService
+│           ├── organization/     Organization members endpoint (minimal)
+│           ├── projects/         ProjectsModule: projects, codes, members
 │           └── generated/        Prisma Client (generated, not committed)
 ├── packages/
 │   ├── config/               Shared configuration (TypeScript base config)

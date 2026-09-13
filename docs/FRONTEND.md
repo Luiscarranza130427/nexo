@@ -20,8 +20,12 @@ apps/web/src/
 │   ├── layout/                Sidebar, header, user menu, theme toggle
 │   ├── auth/                  Login form and organization picker
 │   └── shared/                PageHeader, EmptyState, LoadingScreen, …
-├── features/auth/             Auth provider, state, permissions, schema
+├── features/
+│   ├── auth/                  Auth provider, state, permissions, schema
+│   ├── clients/               Clients module: api, components, hooks, schemas
+│   └── projects/              Projects module: api, components, hooks, schemas
 ├── lib/api/                   HTTP client, typed calls, error normalization
+├── lib/format-date.ts         Timestamp formatting shared by modules
 ├── providers/                 Every client provider, composed once
 ├── config/                    Navigation definition
 └── hooks/                     Small reusable hooks
@@ -185,6 +189,7 @@ Read in one place. `apps/web/.env` is gitignored; `.env.example` documents it.
 ## Not built yet
 
 Search and notifications render as **disabled** controls rather than faking
-behaviour. Module pages show an honest "in construction" state with no invented
+behaviour. Modules not built yet (tasks, team, documents, finance, calendar) show an honest
+"in construction" state with no invented
 data or charts. Component tests need jsdom and testing-library, which are not
 installed; unit tests cover pure logic only.

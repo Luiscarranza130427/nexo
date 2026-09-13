@@ -8,13 +8,16 @@ import { Button } from '@/components/ui/button';
  * Server-side pagination controls.
  *
  * The API returns the page and the totals; nothing is sliced in the browser.
+ * Shared by every paginated list, which differs only in its accessible label.
  */
-export function ClientsPagination({
+export function PaginationControls({
   meta,
   onPageChange,
+  label,
 }: {
   meta: PaginationMeta;
   onPageChange: (page: number) => void;
+  label: string;
 }) {
   if (meta.totalPages <= 1) {
     return null;
@@ -26,7 +29,7 @@ export function ClientsPagination({
   return (
     <nav
       className="flex flex-col items-center justify-between gap-3 sm:flex-row"
-      aria-label="Paginación de clientes"
+      aria-label={label}
     >
       <p className="text-muted-foreground text-sm" aria-live="polite">
         Mostrando {from}–{to} de {meta.total}
