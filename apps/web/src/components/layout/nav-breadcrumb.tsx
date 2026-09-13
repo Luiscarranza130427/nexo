@@ -15,6 +15,13 @@ import { ROUTE_LABELS } from '@/config/navigation';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+/** Action pages below a list or a record, which the navigation does not list. */
+const SEGMENT_LABELS: Record<string, string> = {
+  new: 'Nuevo',
+  edit: 'Editar',
+  board: 'Tablero',
+};
+
 /** Turns an unknown segment into something readable: `my-page` → `My page`. */
 function humanize(segment: string): string {
   const spaced = segment.replace(/-/g, ' ');
@@ -61,7 +68,7 @@ export function NavBreadcrumb() {
       return { href, label: record?.code ?? record?.name ?? 'Detalle' };
     }
 
-    return { href, label: humanize(segment) };
+    return { href, label: SEGMENT_LABELS[segment] ?? humanize(segment) };
   });
 
   return (

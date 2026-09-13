@@ -23,7 +23,8 @@ apps/web/src/
 ├── features/
 │   ├── auth/                  Auth provider, state, permissions, schema
 │   ├── clients/               Clients module: api, components, hooks, schemas
-│   └── projects/              Projects module: api, components, hooks, schemas
+│   ├── projects/              Projects module: api, components, hooks, schemas
+│   └── tasks/                 Tasks module: list, Kanban board, board logic, dialogs
 ├── lib/api/                   HTTP client, typed calls, error normalization
 ├── lib/format-date.ts         Timestamp formatting shared by modules
 ├── providers/                 Every client provider, composed once
@@ -59,9 +60,13 @@ Composed once in `providers/app-providers.tsx`, in this order:
 **shadcn/ui** with the Radix base and the Nova preset (Lucide icons, Geist).
 Components are generated into `components/ui/` and owned by this repository.
 
-Only what is used is installed: button, input, label, card, avatar,
-dropdown-menu, sheet, tooltip, separator, skeleton, badge, breadcrumb, alert and
-sonner.
+Only what is used is installed: button, input, label, textarea, select, card,
+avatar, dropdown-menu, dialog, alert-dialog, sheet, table, tooltip, separator,
+skeleton, badge, breadcrumb, alert and sonner.
+
+Drag and drop on the task board uses `@dnd-kit/core` and `@dnd-kit/sortable`,
+chosen because they support keyboard and touch sensors and screen-reader
+announcements out of the box. See [TASKS.md](./TASKS.md).
 
 Every colour is a semantic token in `app/globals.css` — `background`,
 `foreground`, `card`, `popover`, `primary`, `secondary`, `muted`, `accent`,
@@ -189,7 +194,7 @@ Read in one place. `apps/web/.env` is gitignored; `.env.example` documents it.
 ## Not built yet
 
 Search and notifications render as **disabled** controls rather than faking
-behaviour. Modules not built yet (tasks, team, documents, finance, calendar) show an honest
+behaviour. Modules not built yet (team, documents, finance, calendar) show an honest
 "in construction" state with no invented
 data or charts. Component tests need jsdom and testing-library, which are not
 installed; unit tests cover pure logic only.

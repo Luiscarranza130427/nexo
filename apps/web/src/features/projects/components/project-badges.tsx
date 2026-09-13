@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { PRIORITY_LABELS, PROJECT_STATUS_LABELS, dueDateInfo } from '../labels';
+import { PRIORITY_LABELS, PROJECT_STATUS_LABELS, dueDateInfo, type DueDateInfo } from '../labels';
 
 /**
  * Colour reinforces every label here, it never replaces it: the text is always
@@ -82,10 +82,11 @@ export function DueDateIndicator({
 }) {
   const info = dueDateInfo(dueDate, status);
 
-  if (!info) {
-    return null;
-  }
+  return info ? <DueDateBadge info={info} className={className} /> : null;
+}
 
+/** How a due date reads. Each module decides whether there is one to show. */
+export function DueDateBadge({ info, className }: { info: DueDateInfo; className?: string }) {
   const Icon = info.tone === 'overdue' ? TriangleAlert : Clock;
 
   return (

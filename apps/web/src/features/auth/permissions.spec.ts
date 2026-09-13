@@ -1,4 +1,4 @@
-import { ROLE_LABELS, can } from './permissions';
+import { ROLE_LABELS, can, canChangeTask } from './permissions';
 
 describe('can', () => {
   it('gives an OWNER every capability', () => {
@@ -72,6 +72,53 @@ describe('project capabilities', () => {
     for (const capability of ['create', 'update', 'delete', 'members'] as const) {
       expect(can('MEMBER', `projects:${capability}`)).toBe(false);
     }
+  });
+});
+
+describe('task capabilities', () => {
+  it('lets OWNER and ADMIN create, manage and delete tasks', () => {
+    for (const role of ['OWNER', 'ADMIN'] as const) {
+      for (const capability of ['create', 'manage', 'delete'] as const) {
+        expect(can(role, `tasks:${capability}`)).toBe(true);
+      }
+    }
+  });
+
+  it('lets MANAGER create and manage tasks but never delete them', () => {
+    expect(can('MANAGER', 'tasks:create')).toBe(true);
+    expect(can('MANAGER', 'tasks:manage')).toBe(true);
+    expect(can('MANAGER', 'tasks:delete')).toBe(false);
+  });
+
+  it('gives MEMBER no task capability of its own', () => {
+    for (const capability of ['create', 'manage', 'delete'] as const) {
+      expect(can('MEMBER', `tasks:${capability}`)).toBe(false);
+    }
+  });
+});
+
+describe('canChangeTask', () => {
+  const mine = { assignee: { userId: 'user-1' } };
+  const theirs = { assignee: { userId: 'user-2' } };
+  const unassigned = { assignee: null };
+
+  it('lets managers and above change any task', () => {
+    for (const role of ['OWNER', 'ADMIN', 'MANAGER'] as const) {
+      expect(canChangeTask(role, 'user-1', theirs)).toBe(true);
+      expect(canChangeTask(role, 'user-1', unassigned)).toBe(true);
+    }
+  });
+
+  it('limits a MEMBER to tasks assigned to them', () => {
+    expect(canChangeTask('MEMBER', 'user-1', mine)).toBe(true);
+    expect(canChangeTask('MEMBER', 'user-1', theirs)).toBe(false);
+    expect(canChangeTask('MEMBER', 'user-1', unassigned)).toBe(false);
+  });
+
+  it('denies everything without a role or a user', () => {
+    expect(canChangeTask(null, 'user-1', mine)).toBe(false);
+    expect(canChangeTask('MEMBER', null, mine)).toBe(false);
+    expect(canChangeTask('MEMBER', undefined, unassigned)).toBe(false);
   });
 });
 

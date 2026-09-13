@@ -219,6 +219,26 @@ only the hash. It prints neither the password nor the hash.
 It refuses to touch a user who is not an owner: this is a bootstrap tool, not a
 password-reset tool. Invitations and password reset arrive in a later phase.
 
+## Local development administrator
+
+A second, development-only script creates or resets `admin@novatec.local` as an
+`ADMIN` of the seeded NovaTec organization, for signing in to the panel locally.
+
+```bash
+# The variable exists for this one command only; it is never written to .env.
+DEV_ADMIN_PASSWORD='<a passphrase of at least 12 characters>' pnpm auth:create-admin
+```
+
+- Refuses to run when `NODE_ENV` is `production`.
+- Creates the user if missing; otherwise sets it `ACTIVE` with the new password.
+  An existing user is never deleted.
+- Creates the NovaTec membership or sets it to `ADMIN`, leaving any other
+  organization untouched.
+- Hashes with Argon2id before opening the transaction, and revokes the user's
+  existing sessions, as any password reset should.
+- Prints neither the password nor the hash. The password is not stored in the
+  repository, the documentation or the tests.
+
 ## Password policy
 
 Minimum 12 characters, maximum 128. No composition rules — no "one uppercase, one

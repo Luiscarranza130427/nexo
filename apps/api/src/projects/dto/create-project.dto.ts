@@ -7,26 +7,9 @@ import {
   IsUUID,
   MaxLength,
   MinLength,
-  ValidateIf,
 } from 'class-validator';
+import { ValidateUnlessUndefined, trimmedOrNull } from '../../common/validation.js';
 import { Priority, ProjectStatus } from '../../generated/prisma/enums.js';
-
-/** Trims, and turns a blank result into null so an emptied field clears. */
-const trimmedOrNull = ({ value }: { value: unknown }) => {
-  if (typeof value !== 'string') {
-    return value;
-  }
-
-  const next = value.trim();
-
-  return next.length === 0 ? null : next;
-};
-
-/**
- * Validated even when `null`, unlike `@IsOptional()`: these columns are not
- * nullable, so `null` must be a 400, not a database error.
- */
-const unlessUndefined = ValidateIf((_object, value) => value !== undefined);
 
 export class CreateProjectDto {
   @Transform(trimmedOrNull)
@@ -50,12 +33,12 @@ export class CreateProjectDto {
   clientId?: string | null;
 
   /** Defaults to PLANNING: a new project has not started yet. */
-  @unlessUndefined
+  @ValidateUnlessUndefined()
   @IsEnum(ProjectStatus)
   status?: ProjectStatus;
 
   /** Defaults to MEDIUM: nothing is urgent until someone says so. */
-  @unlessUndefined
+  @ValidateUnlessUndefined()
   @IsEnum(Priority)
   priority?: Priority;
 

@@ -20,6 +20,9 @@ export type Capability =
   | 'clients:create'
   | 'clients:update'
   | 'clients:delete'
+  | 'tasks:create'
+  | 'tasks:manage'
+  | 'tasks:delete'
   | 'workspace:view';
 
 /**
@@ -37,6 +40,9 @@ const CAPABILITIES: Record<MembershipRole, readonly Capability[]> = {
     'clients:create',
     'clients:update',
     'clients:delete',
+    'tasks:create',
+    'tasks:manage',
+    'tasks:delete',
     'workspace:view',
   ],
   ADMIN: [
@@ -48,6 +54,9 @@ const CAPABILITIES: Record<MembershipRole, readonly Capability[]> = {
     'clients:create',
     'clients:update',
     'clients:delete',
+    'tasks:create',
+    'tasks:manage',
+    'tasks:delete',
     'workspace:view',
   ],
   // A manager runs the work but does not destroy records.
@@ -57,8 +66,11 @@ const CAPABILITIES: Record<MembershipRole, readonly Capability[]> = {
     'projects:members',
     'clients:create',
     'clients:update',
+    'tasks:create',
+    'tasks:manage',
     'workspace:view',
   ],
+  // Works on the tasks assigned to them — see `canChangeTask`.
   MEMBER: ['workspace:view'],
 };
 
@@ -69,6 +81,25 @@ export function can(role: MembershipRole | null | undefined, capability: Capabil
   }
 
   return CAPABILITIES[role].includes(capability);
+}
+
+type AssignedTask = { assignee: { userId: string } | null };
+
+/**
+ * Whether someone may edit or move one particular task. `tasks:manage` covers
+ * every task; without it, only a task assigned to the person themselves — the
+ * rule the API enforces for a MEMBER. Reassigning always needs `tasks:manage`.
+ */
+export function canChangeTask(
+  role: MembershipRole | null | undefined,
+  userId: string | null | undefined,
+  task: AssignedTask,
+): boolean {
+  if (can(role, 'tasks:manage')) {
+    return true;
+  }
+
+  return Boolean(role && userId) && task.assignee?.userId === userId;
 }
 
 /** Human wording for a role. The interface never shows `OWNER` verbatim. */

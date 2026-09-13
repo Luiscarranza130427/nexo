@@ -59,13 +59,15 @@ nexo/
 │       │   ├── migrations/       Committed migration history
 │       │   └── seed.ts           Idempotent development seed
 │       ├── prisma.config.ts      Prisma 7 CLI configuration
-│       ├── scripts/              Operational scripts (bootstrap-owner)
+│       ├── scripts/              Operational scripts (bootstrap-owner, create-admin)
 │       └── src/
 │           ├── auth/             AuthModule: login, sessions, guards, RBAC
 │           ├── clients/          ClientsModule
+│           ├── common/           Small helpers shared by DTOs
 │           ├── database/         DatabaseModule + PrismaService
 │           ├── organization/     Organization members endpoint (minimal)
 │           ├── projects/         ProjectsModule: projects, codes, members
+│           ├── tasks/            TasksModule: tasks, board, ordering
 │           └── generated/        Prisma Client (generated, not committed)
 ├── packages/
 │   ├── config/               Shared configuration (TypeScript base config)

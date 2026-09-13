@@ -246,6 +246,10 @@ model Task {
   @@index([projectId, status, position])
   @@index([organizationId, status])
   @@index([assigneeId])
+  // Organization-wide task list, newest first.
+  @@index([organizationId, createdAt])
+  // Due-date filters and sorting across the organization.
+  @@index([organizationId, dueDate])
 }
 
 /// A refresh-token session. One row per active login, per organization context.

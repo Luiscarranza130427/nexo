@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { ClientsModule } from './clients/clients.module.js';
 import { OrganizationModule } from './organization/organization.module.js';
 import { ProjectsModule } from './projects/projects.module.js';
+import { TasksModule } from './tasks/tasks.module.js';
 import { DatabaseModule } from './database/database.module.js';
 
 @Module({
@@ -33,6 +34,7 @@ import { DatabaseModule } from './database/database.module.js';
     ClientsModule,
     OrganizationModule,
     ProjectsModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

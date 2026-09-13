@@ -68,8 +68,10 @@ filter without a join. The application is responsible for keeping a task's
   have no client. The API generates the code; clients never send it.
 - **ProjectMember** — a plain join record. It has no role of its own yet; project
   permissions derive from `Membership` until a real need appears.
-- **Task** — `position` is a manual ordering slot for a future Kanban board.
-  `completedAt` is separate from `status` so completion time survives status edits.
+- **Task** — `position` orders a task inside its board column (project + status),
+  as integers spaced 1000 apart and maintained only by the API. `completedAt` is
+  separate from `status` so completion time survives status edits. See
+  [TASKS.md](./TASKS.md).
 - **Session** — the server-side half of a login, which is what makes a refresh
   token revocable. Stores a SHA-256 fingerprint of the current refresh token,
   never the token itself. `userAgent` and `ipAddress` are recorded for auditing;
@@ -171,6 +173,8 @@ single-column index on `organizationId` would be redundant.
 | `Task`          | `projectId + status + position`   | Kanban board: column, in order.        |
 | `Task`          | `organizationId + status`         | Organization-wide task views.          |
 | `Task`          | `assigneeId`                      | A user's assigned tasks.               |
+| `Task`          | `organizationId + createdAt`      | Default task list ordering.            |
+| `Task`          | `organizationId + dueDate`        | Due-date filters and sorting.          |
 | `Session`       | `userId`                          | Revoke every session of a user.        |
 | `Session`       | `organizationId`                  | Sessions within an organization.       |
 | `Session`       | `expiresAt`                       | Future cleanup of expired rows.        |

@@ -11,7 +11,7 @@ Phases are built in order. Nothing from a later phase is implemented early.
 | 5     | Design system and layout         | ✅ Done        |
 | 6     | Clients                          | ✅ Done        |
 | 7     | Projects                         | ✅ Done        |
-| 8     | Tasks                            | ⬜ Not started |
+| 8     | Tasks and Kanban                 | ✅ Done        |
 | 9     | Team                             | ⬜ Not started |
 | 10    | Documents                        | ⬜ Not started |
 | 11    | Finances                         | ⬜ Not started |
@@ -46,7 +46,11 @@ and sorting; per-organization document uniqueness; role-aware UI. See
 concurrency-safe per-organization codes that are never reused; team members;
 search, filters, sorting and pagination. See [PROJECTS.md](./PROJECTS.md).
 
-**8 — Tasks.** Tasks inside projects, with assignees, statuses and due dates.
+**8 — Tasks and Kanban.** Tasks inside projects with an assignee chosen among the
+project's members, status, priority and dates; a filterable list and a Kanban
+board per project with drag and drop, keyboard moves and optimistic updates;
+order persisted with spaced positions under a per-project lock; a `MEMBER` works
+only on the tasks assigned to them. See [TASKS.md](./TASKS.md).
 
 **9 — Team.** Users, invitations, role assignment and deactivation.
 

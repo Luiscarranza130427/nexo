@@ -318,3 +318,123 @@ export type ProjectErrorCode =
   | 'PROJECT_HAS_TASKS'
   | 'PROJECT_CODE_GENERATION_FAILED'
   | 'INVALID_PROJECT_DATES';
+
+// ---------------------------------------------------------------------------
+// Tasks
+// ---------------------------------------------------------------------------
+
+/** Plain union; `tasks.contract.spec.ts` asserts it matches the database enum. */
+export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'IN_REVIEW' | 'DONE' | 'CANCELLED';
+
+/** Statuses that have a column on the board. Cancelled tasks stay off it. */
+export type BoardTaskStatus = Exclude<TaskStatus, 'CANCELLED'>;
+
+/** The minimum a task needs to show and link its project. */
+export type ProjectReference = {
+  id: string;
+  code: string;
+  name: string;
+};
+
+/** Same shape as a project member: users are identified by `userId`. */
+export type TaskAssignee = ProjectMemberSummary;
+
+/** A row of `GET /tasks`, and a card on the board. No description. */
+export type TaskListItem = {
+  id: string;
+  title: string;
+  status: TaskStatus;
+  priority: Priority;
+  /** Order inside its column. Assigned by the API; never sent by the client. */
+  position: number;
+  /** Calendar dates at UTC midnight; format them in UTC. */
+  startDate: string | null;
+  dueDate: string | null;
+  /** Maintained by the API: set on entering DONE, cleared on leaving it. */
+  completedAt: string | null;
+  project: ProjectReference;
+  assignee: TaskAssignee | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+/** `GET /tasks/:id`. */
+export type TaskDetail = TaskListItem & {
+  description: string | null;
+};
+
+export type TaskSortField =
+  'position' | 'title' | 'priority' | 'createdAt' | 'updatedAt' | 'startDate' | 'dueDate';
+
+/** Query accepted by `GET /tasks`. Every field is optional. */
+export type TaskListQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  projectId?: string;
+  status?: TaskStatus;
+  priority?: Priority;
+  assigneeId?: string;
+  /** `YYYY-MM-DD`, inclusive. */
+  dueFrom?: string;
+  dueTo?: string;
+  sortBy?: TaskSortField;
+  sortOrder?: SortOrder;
+};
+
+/** Query accepted by `GET /tasks/board`. */
+export type TaskBoardQuery = {
+  projectId: string;
+  search?: string;
+  priority?: Priority;
+  assigneeId?: string;
+};
+
+export type TaskBoardColumn = {
+  status: BoardTaskStatus;
+  /** Real number of matching tasks, even when `tasks` is capped. */
+  total: number;
+  tasks: TaskListItem[];
+};
+
+/** `GET /tasks/board`: every open task of one project, by column. */
+export type TaskBoard = {
+  limitPerColumn: number;
+  columns: TaskBoardColumn[];
+};
+
+/** Body of `POST /tasks`. No position and no completedAt: the API owns both. */
+export type CreateTaskInput = {
+  projectId: string;
+  title: string;
+  description?: string | null;
+  status?: TaskStatus;
+  priority?: Priority;
+  assigneeId?: string | null;
+  startDate?: string | null;
+  dueDate?: string | null;
+};
+
+/** Body of `PATCH /tasks/:id`. The project cannot change. */
+export type UpdateTaskInput = Partial<Omit<CreateTaskInput, 'projectId'>>;
+
+/**
+ * Body of `PATCH /tasks/:id/move`. Where the task lands is described by its new
+ * neighbours, never by a raw position: `afterTaskId` sits directly above it,
+ * `beforeTaskId` directly below. Neither means "end of the column".
+ */
+export type MoveTaskInput = {
+  status: TaskStatus;
+  afterTaskId?: string | null;
+  beforeTaskId?: string | null;
+};
+
+/** Error codes specific to the tasks module. */
+export type TaskErrorCode =
+  | 'TASK_NOT_FOUND'
+  | 'TASK_PROJECT_NOT_FOUND'
+  | 'TASK_ASSIGNEE_NOT_FOUND'
+  | 'TASK_ASSIGNEE_NOT_PROJECT_MEMBER'
+  | 'INVALID_TASK_DATES'
+  | 'INVALID_TASK_POSITION'
+  | 'TASK_MOVE_FAILED';

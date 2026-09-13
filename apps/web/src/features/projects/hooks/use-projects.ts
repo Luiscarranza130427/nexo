@@ -21,12 +21,13 @@ import {
 import { organizationMembersKey, projectKeys } from '../query-keys';
 
 /** Paginated list. The server does the paging; the cache is keyed by the filters. */
-export function useProjectsQuery(query: ProjectListQuery) {
+export function useProjectsQuery(query: ProjectListQuery, enabled = true) {
   return useQuery({
     queryKey: projectKeys.list(query),
     queryFn: () => fetchProjects(query),
     // Keeps the previous page on screen while the next one loads.
     placeholderData: (previous) => previous,
+    enabled,
   });
 }
 

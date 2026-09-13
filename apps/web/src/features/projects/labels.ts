@@ -64,9 +64,6 @@ export type DueDateInfo = {
 const DAY_MS = 86_400_000;
 
 /**
- * How close a due date is, for display only — not an alerting system.
- *
- * Compares calendar days: the viewer's local today against the stored date.
  * A completed or cancelled project gets no indicator, since being "overdue"
  * no longer means anything for it.
  */
@@ -79,6 +76,16 @@ export function dueDateInfo(
     return null;
   }
 
+  return describeDueDate(dueIso, now);
+}
+
+/**
+ * How close a due date is, for display only — not an alerting system. Shared
+ * by projects and tasks, which each decide when a date stops mattering.
+ *
+ * Compares calendar days: the viewer's local today against the stored date.
+ */
+export function describeDueDate(dueIso: string, now: Date = new Date()): DueDateInfo {
   const due = Date.parse(`${dueIso.slice(0, 10)}T00:00:00.000Z`);
   const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
   const days = Math.round((due - today) / DAY_MS);

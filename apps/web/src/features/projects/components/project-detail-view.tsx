@@ -1,7 +1,16 @@
 'use client';
 
 import type { ProjectDetail } from '@nexo/types';
-import { Building2, CalendarRange, ListChecks, Pencil, Trash2, Users } from 'lucide-react';
+import {
+  Building2,
+  CalendarRange,
+  ListChecks,
+  Pencil,
+  Plus,
+  SquareKanban,
+  Trash2,
+  Users,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -13,6 +22,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/features/auth/auth-provider';
 import { can } from '@/features/auth/permissions';
+import { TaskFormDialog } from '@/features/tasks/components/task-form-dialog';
 import { formatDateTime } from '@/lib/format-date';
 import { useProjectQuery } from '../hooks/use-projects';
 import { formatCalendarDate } from '../labels';
@@ -62,8 +72,16 @@ function DetailSkeleton() {
   );
 }
 
-/** Real counts from the API. Task management itself arrives in the next phase. */
-function TaskSummary({ tasks }: { tasks: ProjectDetail['tasks'] }) {
+/** Real counts from the API; the work itself happens on the board. */
+function TaskSummary({
+  tasks,
+  canCreate,
+  onCreate,
+}: {
+  tasks: ProjectDetail['tasks'];
+  canCreate: boolean;
+  onCreate: () => void;
+}) {
   const cells = [
     { label: 'Total', value: tasks.total },
     { label: 'Por hacer', value: tasks.todo },
@@ -83,9 +101,15 @@ function TaskSummary({ tasks }: { tasks: ProjectDetail['tasks'] }) {
         ))}
       </dl>
       {tasks.total === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          Este proyecto aún no tiene tareas. La gestión de tareas llegará en la siguiente fase.
-        </p>
+        <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-muted-foreground text-sm">Este proyecto aún no tiene tareas.</p>
+          {canCreate ? (
+            <Button size="sm" onClick={onCreate} className="gap-1.5">
+              <Plus className="size-4" aria-hidden="true" />
+              Crear primera tarea
+            </Button>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );
@@ -96,12 +120,14 @@ export function ProjectDetailView({ id }: { id: string }) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
   const [managingMembers, setManagingMembers] = useState(false);
+  const [creatingTask, setCreatingTask] = useState(false);
   const { data: project, isPending, isError, error } = useProjectQuery(id);
 
   const role = membership?.role;
   const canUpdate = can(role, 'projects:update');
   const canDelete = can(role, 'projects:delete');
   const canManageMembers = can(role, 'projects:members');
+  const canCreateTask = can(role, 'tasks:create');
 
   if (isPending) {
     return <DetailSkeleton />;
@@ -126,28 +152,32 @@ export function ProjectDetailView({ id }: { id: string }) {
           </div>
         </div>
 
-        {canUpdate || canDelete ? (
-          <div className="flex shrink-0 flex-wrap gap-2">
-            {canUpdate ? (
-              <Button asChild variant="outline" className="gap-2">
-                <Link href={`/projects/${project.id}/edit`}>
-                  <Pencil className="size-4" aria-hidden="true" />
-                  Editar
-                </Link>
-              </Button>
-            ) : null}
-            {canDelete ? (
-              <Button
-                variant="outline"
-                onClick={() => setDeleting(true)}
-                className="text-destructive hover:text-destructive gap-2"
-              >
-                <Trash2 className="size-4" aria-hidden="true" />
-                Eliminar
-              </Button>
-            ) : null}
-          </div>
-        ) : null}
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Button asChild variant="outline" className="gap-2">
+            <Link href={`/projects/${project.id}/board`}>
+              <SquareKanban className="size-4" aria-hidden="true" />
+              Tablero
+            </Link>
+          </Button>
+          {canUpdate ? (
+            <Button asChild variant="outline" className="gap-2">
+              <Link href={`/projects/${project.id}/edit`}>
+                <Pencil className="size-4" aria-hidden="true" />
+                Editar
+              </Link>
+            </Button>
+          ) : null}
+          {canDelete ? (
+            <Button
+              variant="outline"
+              onClick={() => setDeleting(true)}
+              className="text-destructive hover:text-destructive gap-2"
+            >
+              <Trash2 className="size-4" aria-hidden="true" />
+              Eliminar
+            </Button>
+          ) : null}
+        </div>
       </header>
 
       <div className="grid gap-6 lg:grid-cols-3">
@@ -167,8 +197,20 @@ export function ProjectDetailView({ id }: { id: string }) {
             </CardContent>
           </Card>
 
-          <SectionCard icon={ListChecks} title="Tareas">
-            <TaskSummary tasks={project.tasks} />
+          <SectionCard
+            icon={ListChecks}
+            title="Tareas"
+            action={
+              <Button asChild variant="ghost" size="sm" className="-my-1 h-8">
+                <Link href={`/projects/${project.id}/board`}>Abrir tablero</Link>
+              </Button>
+            }
+          >
+            <TaskSummary
+              tasks={project.tasks}
+              canCreate={canCreateTask}
+              onCreate={() => setCreatingTask(true)}
+            />
           </SectionCard>
         </div>
 
@@ -250,6 +292,8 @@ export function ProjectDetailView({ id }: { id: string }) {
         onOpenChange={setManagingMembers}
         canManage={canManageMembers}
       />
+
+      <TaskFormDialog projectId={project.id} open={creatingTask} onOpenChange={setCreatingTask} />
     </>
   );
 }

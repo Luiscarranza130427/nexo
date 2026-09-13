@@ -14,6 +14,7 @@
     "prisma:seed": "prisma db seed",
     "prisma:studio": "prisma studio",
     "auth:bootstrap-owner": "node --import tsx scripts/bootstrap-owner.ts",
+    "auth:create-admin": "node --import tsx scripts/create-admin.ts",
     "start": "nest start",
     "start:prod": "node dist/main",
     "lint": "oxlint src/ test/",

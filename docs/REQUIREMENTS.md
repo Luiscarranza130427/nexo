@@ -24,7 +24,11 @@ The smallest version of Nexo that a team could actually run its operations on.
   dates, an API-generated code unique per organization (`NEX-001`), and assigned
   team members. Search, filters, sorting and server-side pagination, all scoped to
   the organization. See [PROJECTS.md](./PROJECTS.md).
-- **Tasks** — belong to a project; have an assignee, a status and a due date.
+- **Tasks** — ✅ implemented. Belong to a project; an assignee chosen among the
+  project's members, status, priority, start and due dates. A list with search,
+  filters, sorting and server-side pagination, and a Kanban board per project
+  with drag and drop whose order persists. A `MEMBER` works only on the tasks
+  assigned to them. See [TASKS.md](./TASKS.md).
 - **Team** — invite users, assign roles, deactivate users.
 
 ### Interface

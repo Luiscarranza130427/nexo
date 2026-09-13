@@ -118,7 +118,9 @@ loaded for a list, so there is no N+1.
 
 The detail adds `members` (`userId`, names, `avatarUrl`) and a task summary with
 real counts per status (`total`, `todo`, `inProgress`, `inReview`, `done`,
-`cancelled`). All zero until tasks exist in phase 8; nothing is invented.
+`cancelled`), computed with one grouped count. Every task change invalidates it,
+so the counts follow the board. Tasks themselves are documented in
+[TASKS.md](./TASKS.md).
 
 Users are identified by `userId` everywhere in this module, never by a bare `id`,
 so they cannot be confused with a project or a membership row.

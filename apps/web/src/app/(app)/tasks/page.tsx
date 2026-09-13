@@ -1,15 +1,23 @@
 import type { Metadata } from 'next';
-import { ListChecks } from 'lucide-react';
-import { ModulePlaceholder } from '@/components/shared/module-placeholder';
+import { Suspense } from 'react';
+import { PageHeader } from '@/components/shared/page-header';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TasksView } from '@/features/tasks/components/tasks-view';
 
 export const metadata: Metadata = { title: 'Tareas' };
 
-export default function Page() {
+/** `TasksView` reads the URL through `useSearchParams`, which needs a Suspense boundary. */
+export default function TasksPage() {
   return (
-    <ModulePlaceholder
-      title="Tareas"
-      description="Las unidades de trabajo del día a día dentro de cada proyecto."
-      icon={ListChecks}
-    />
+    <Suspense
+      fallback={
+        <>
+          <PageHeader title="Tareas" />
+          <Skeleton className="h-80 w-full rounded-xl" />
+        </>
+      }
+    >
+      <TasksView />
+    </Suspense>
   );
 }
